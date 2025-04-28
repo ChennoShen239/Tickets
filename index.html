@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>楚楚的奖励兑换券们 (Firebase)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .coupon-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        /* 日历样式 */
+        .calendar { width: 100%; background: white; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); overflow: hidden; }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: #e5e7eb; border: 1px solid #e5e7eb; }
+        .calendar-day, .calendar-weekday { padding: 0.5rem; text-align: center; background-color: white; font-size: 0.875rem; min-height: 40px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .calendar-weekday { font-weight: 600; background-color: #f9fafb; }
+        .calendar-day.other-month { color: #9ca3af; background-color: #f9fafb; }
+        .calendar-day.today { background-color: #bfdbfe; font-weight: bold; }
+        .calendar-day.selected { background-color: #3b82f6; color: white; border-radius: 50%; }
+        .calendar-day.has-log::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; background-color: #ef4444; border-radius: 50%; }
+        .calendar-day.selected.has-log::after { background-color: white; }
+        .calendar-day:not(.other-month):not(.selected):hover { background-color: #f3f4f6; cursor: pointer; border-radius: 50%; }
+        .log-area { margin-top: 1.5rem; background: white; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); min-height: 100px; }
+        .log-entry { font-size: 0.875rem; color: #4b5563; padding: 0.25rem 0; border-bottom: 1px solid #f3f4f6; }
+        .log-entry:last-child { border-bottom: none; }
+        /* 加载状态样式 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            font-size: 1.2rem;
+            color: #333;
+        }
+        /* Emoji 容器样式 */
+        .emoji-container {
+            height: 12rem; /* h-48 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+
+    <div id="loading-indicator" class="loading-overlay">
+        正在加载数据...
+    </div>
+
+    <div class="container mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <div class="lg:col-span-2">
+            <h1 class="text-3xl font-bold text-center text-gray-800 mb-10">楚楚的奖励兑换券们 🎟️✨</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden coupon-card transition-all duration-300 ease-in-out flex flex-col" data-coupon-id="cake" data-coupon-name="小蛋糕券">
+                     <div class="emoji-container bg-orange-100">
+                         <span class="text-7xl">🍰</span>
+                     </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-2">小蛋糕券</h2>
+                        <p class="text-gray-600 text-sm mb-4 flex-grow">凭此券可兑换一份美味的小蛋糕。松软香甜，给你带来甜蜜好心情！</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-gray-700 font-medium">当前数量:</span>
+                            <div class="flex items-center gap-2">
+                                <button class="quantity-change bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="decrease">-</button>
+                                <span class="quantity-display text-lg font-semibold w-8 text-center">...</span>
+                                <button class="quantity-change bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="increase">+</button>
+                            </div>
+                        </div>
+                        <button class="use-coupon mt-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out w-full opacity-50 cursor-not-allowed" disabled>
+                            使用一张
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md overflow-hidden coupon-card transition-all duration-300 ease-in-out flex flex-col" data-coupon-id="salmon" data-coupon-name="三文鱼券">
+                     <div class="emoji-container bg-teal-100">
+                         <span class="text-7xl">🍣</span>
+                     </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <h2 class="text-xl font-semibold text-gray-800 mb-2">三文鱼券</h2>
+                        <p class="text-gray-600 text-sm mb-4 flex-grow">凭此券可享受新鲜美味的三文鱼料理。肉质鲜嫩，营养丰富！</p>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-gray-700 font-medium">当前数量:</span>
+                            <div class="flex items-center gap-2">
+                                <button class="quantity-change bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="decrease">-</button>
+                                <span class="quantity-display text-lg font-semibold w-8 text-center">...</span>
+                                <button class="quantity-change bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="increase">+</button>
+                            </div>
+                        </div>
+                         <button class="use-coupon mt-auto bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out w-full opacity-50 cursor-not-allowed" disabled>
+                            使用一张
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+             <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">奖券日历 🗓️</h2>
+             <div id="calendar-container" class="calendar mb-6">
+                <div class="calendar-header">
+                    <button id="prev-month" class="p-1 rounded hover:bg-gray-200">&lt;</button>
+                    <span id="current-month-year" class="font-semibold text-lg"></span>
+                    <button id="next-month" class="p-1 rounded hover:bg-gray-200">&gt;</button>
+                </div>
+                <div class="calendar-grid" id="calendar-weekdays"></div>
+                <div class="calendar-grid" id="calendar-days"></div>
+             </div>
+             <h3 class="text-xl font-semibold text-gray-700 mb-3">奖券记录 📝 (<span id="selected-date-display">未选择日期</span>)</h3>
+             <div id="log-display-area" class="log-area">
+                 <p class="text-gray-500 italic">请在日历中选择一个日期查看奖券记录。</p>
+             </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+
+    <script>
+        // --- Firebase 配置 ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyBxzlxj-Sva3kVxhsWHI_2BGHJeYPHGS2s",
+          authDomain: "tickets-91f95.firebaseapp.com",
+          databaseURL: "https://tickets-91f95-default-rtdb.firebaseio.com",
+          projectId: "tickets-91f95",
+          storageBucket: "tickets-91f95.appspot.com",
+          messagingSenderId: "507720843459",
+          appId: "1:507720843459:web:d8118e2d4ed09263846276",
+          measurementId: "G-BHG904WQPN"
+        };
+
+        // --- 初始化 Firebase ---
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // --- 全局状态 ---
+        let currentDate = new Date();
+        let selectedDate = null;
+        let localActionLogs = {};
+
+        // --- DOM 元素引用 ---
+        const couponCards = document.querySelectorAll('.coupon-card');
+        const calendarContainer = document.getElementById('calendar-container');
+        const calendarDaysGrid = document.getElementById('calendar-days');
+        const calendarWeekdaysGrid = document.getElementById('calendar-weekdays');
+        const currentMonthYearEl = document.getElementById('current-month-year');
+        const prevMonthBtn = document.getElementById('prev-month');
+        const nextMonthBtn = document.getElementById('next-month');
+        const logDisplayArea = document.getElementById('log-display-area');
+        const selectedDateDisplay = document.getElementById('selected-date-display');
+        const loadingIndicator = document.getElementById('loading-indicator');
+
+        // --- Firebase 数据库引用 ---
+        const couponsRef = database.ref('coupons');
+        const logsRef = database.ref('logs');
+
+        // --- 功能函数 ---
+
+        /**
+         * 更新奖券数量显示和按钮状态
+         * @param {string} couponId - 奖券ID
+         * @param {number} quantity - 数量
+         */
+        function updateQuantityDisplay(couponId, quantity) {
+            const card = document.querySelector(`.coupon-card[data-coupon-id="${couponId}"]`);
+            if (card) {
+                const quantityEl = card.querySelector('.quantity-display');
+                const decreaseBtn = card.querySelector('.quantity-change[data-action="decrease"]');
+                const useBtn = card.querySelector('.use-coupon');
+
+                const numQuantity = Number(quantity);
+                const displayQuantity = isNaN(numQuantity) ? 0 : numQuantity;
+
+                quantityEl.textContent = displayQuantity;
+                const disable = displayQuantity <= 0;
+
+                if (decreaseBtn) {
+                    decreaseBtn.disabled = disable;
+                    decreaseBtn.classList.toggle('opacity-50', disable);
+                    decreaseBtn.classList.toggle('cursor-not-allowed', disable);
+                }
+                if (useBtn) {
+                    useBtn.disabled = disable;
+                    useBtn.classList.toggle('opacity-50', disable);
+                    useBtn.classList.toggle('cursor-not-allowed', disable);
+                }
+            }
+        }
+
+        /**
+         * 获取格式化的日期字符串 (YYYY-MM-DD)
+         * @param {Date} date - 日期对象
+         * @returns {string}
+         */
+        function getFormattedDate(date) {
+            if (!(date instanceof Date) || isNaN(date)) {
+                console.error("Invalid date provided to getFormattedDate:", date);
+                const today = new Date();
+                 const year = today.getFullYear();
+                 const month = String(today.getMonth() + 1).padStart(2, '0');
+                 const day = String(today.getDate()).padStart(2, '0');
+                 return `${year}-${month}-${day}`;
+            }
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        /**
+         * 记录操作日志到 Firebase
+         * @param {string} couponName - 奖券名称
+         * @param {string} actionType - 操作类型
+         * @param {number} quantityChange - 数量变化
+         */
+        function logActionToFirebase(couponName, actionType, quantityChange) {
+            const todayStr = getFormattedDate(new Date());
+            const timeStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit'});
+            let message = `${timeStr} - `;
+
+            if (actionType === '增加') message += `增加了 ${quantityChange} 个 ${couponName}`;
+            else if (actionType === '减少') message += `减少了 ${-quantityChange} 个 ${couponName}`;
+            else if (actionType === '使用') message += `使用了 1 个 ${couponName}`;
+
+            const dateLogRef = logsRef.child(todayStr);
+            dateLogRef.push({
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                message: message
+            }).catch(error => {
+                console.error("Error writing log to Firebase:", error);
+            });
+        }
+
+        /**
+         * 处理数量变更按钮点击
+         * @param {Event} event
+         */
+        function handleQuantityChange(event) {
+            const button = event.target.closest('.quantity-change');
+            if (!button || button.disabled) return;
+            const card = button.closest('.coupon-card');
+            if (!card) return;
+            const couponId = card.dataset.couponId;
+            const couponName = card.dataset.couponName;
+            const action = button.dataset.action;
+            if (!couponId || !couponName) {
+                console.error("Missing coupon ID or name on card:", card);
+                return;
+            }
+            const couponQuantityRef = couponsRef.child(couponId).child('quantity');
+
+            couponQuantityRef.transaction(currentQuantity => {
+                 let numQuantity = Number(currentQuantity);
+                 if (currentQuantity === null || isNaN(numQuantity)) {
+                     numQuantity = 0;
+                 }
+                if (action === 'increase') {
+                    return numQuantity + 1;
+                } else if (action === 'decrease') {
+                    if (numQuantity > 0) {
+                        return numQuantity - 1;
+                    } else {
+                        return; // Abort transaction
+                    }
+                } else {
+                    return; // Abort transaction
+                }
+            }, (error, committed, snapshot) => {
+                if (error) {
+                    console.error("Quantity change transaction failed:", error);
+                } else if (committed) {
+                    let change = 0;
+                    let actionType = '';
+                    if (action === 'increase') {
+                        change = 1;
+                        actionType = '增加';
+                    } else if (action === 'decrease') {
+                        change = -1;
+                        actionType = '减少';
+                    }
+                    if (actionType) {
+                         logActionToFirebase(couponName, actionType, change);
+                    }
+                }
+            });
+        }
+
+        /**
+         * 处理使用奖券按钮点击
+         * @param {Event} event
+         */
+        function handleUseCoupon(event) {
+            const button = event.target.closest('.use-coupon');
+            if (!button || button.disabled) return;
+            const card = button.closest('.coupon-card');
+            if (!card) return;
+            const couponId = card.dataset.couponId;
+            const couponName = card.dataset.couponName;
+            if (!couponId || !couponName) {
+                console.error("Missing coupon ID or name on card:", card);
+                return;
+            }
+            const couponQuantityRef = couponsRef.child(couponId).child('quantity');
+
+            couponQuantityRef.transaction(currentQuantity => {
+                 let numQuantity = Number(currentQuantity);
+                 if (currentQuantity === null || isNaN(numQuantity)) {
+                     numQuantity = 0;
+                 }
+                if (numQuantity > 0) {
+                    return numQuantity - 1;
+                } else {
+                    return; // Abort transaction
+                }
+            }, (error, committed, snapshot) => {
+                if (error) {
+                    console.error("Use coupon transaction failed:", error);
+                } else if (committed) {
+                    logActionToFirebase(couponName, '使用', -1);
+                }
+            });
+        }
+
+        // --- 日历渲染和日志显示 ---
+
+        function renderCalendar() {
+            calendarDaysGrid.innerHTML = '';
+            calendarWeekdaysGrid.innerHTML = '';
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            currentMonthYearEl.textContent = `${year}年${month + 1}月`;
+
+            const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
+            weekdays.forEach(day => {
+                const weekdayEl = document.createElement('div');
+                weekdayEl.classList.add('calendar-weekday');
+                weekdayEl.textContent = day;
+                calendarWeekdaysGrid.appendChild(weekdayEl);
+            });
+
+            const firstDayOfMonth = new Date(year, month, 1);
+            const lastDayOfMonth = new Date(year, month + 1, 0);
+            const daysInMonth = lastDayOfMonth.getDate();
+            let startDayOfWeek = firstDayOfMonth.getDay();
+            startDayOfWeek = (startDayOfWeek === 0) ? 6 : startDayOfWeek - 1;
+
+            const today = new Date();
+            const todayStr = getFormattedDate(today);
+
+            const lastDayOfPrevMonth = new Date(year, month, 0);
+            const daysInPrevMonth = lastDayOfPrevMonth.getDate();
+            for (let i = startDayOfWeek - 1; i >= 0; i--) {
+                const day = daysInPrevMonth - i;
+                const date = new Date(year, month - 1, day);
+                const dateStr = getFormattedDate(date);
+                const dayEl = createDayElement(day, dateStr, ['other-month']);
+                calendarDaysGrid.appendChild(dayEl);
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = getFormattedDate(date);
+                const classes = [];
+                if (dateStr === todayStr) classes.push('today');
+                if (dateStr === selectedDate) classes.push('selected');
+                if (localActionLogs[dateStr] && localActionLogs[dateStr].length > 0) classes.push('has-log');
+                const dayEl = createDayElement(day, dateStr, classes);
+                calendarDaysGrid.appendChild(dayEl);
+            }
+
+            const totalCells = calendarDaysGrid.children.length;
+            const nextMonthDaysNeeded = 42 - totalCells;
+            for (let i = 1; i <= nextMonthDaysNeeded; i++) {
+                 const date = new Date(year, month + 1, i);
+                 const dateStr = getFormattedDate(date);
+                 const dayEl = createDayElement(i, dateStr, ['other-month']);
+                 calendarDaysGrid.appendChild(dayEl);
+            }
+        }
+
+        function createDayElement(dayNumber, dateStr, classes = []) {
+            const dayEl = document.createElement('div');
+            dayEl.classList.add('calendar-day', ...classes);
+            dayEl.textContent = dayNumber;
+            dayEl.dataset.date = dateStr;
+            if (!classes.includes('other-month')) {
+                dayEl.addEventListener('click', handleDateClick);
+            }
+            return dayEl;
+        }
+
+        function handleDateClick(event) {
+            const clickedDateStr = event.target.dataset.date;
+            if (!clickedDateStr) return;
+            selectedDate = clickedDateStr;
+            selectedDateDisplay.textContent = clickedDateStr;
+            renderCalendar();
+            displayLogsForDate(clickedDateStr);
+        }
+
+        function displayLogsForDate(dateStr) {
+            logDisplayArea.innerHTML = '';
+            const logs = localActionLogs[dateStr];
+            if (logs && logs.length > 0) {
+                const sortedLogs = [...logs].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                sortedLogs.forEach(logData => {
+                    if (logData && logData.message) {
+                        const logEl = document.createElement('div');
+                        logEl.classList.add('log-entry');
+                        logEl.textContent = logData.message;
+                        logDisplayArea.appendChild(logEl);
+                    }
+                });
+            } else {
+                logDisplayArea.innerHTML = '<p class="text-gray-500 italic">这一天没有奖券记录。</p>';
+            }
+        }
+
+        // --- Firebase 数据监听 ---
+
+        function listenToCouponChanges() {
+            couponsRef.on('value', (snapshot) => {
+                loadingIndicator.style.display = 'flex';
+                const couponsData = snapshot.val();
+                if (couponsData) {
+                    Object.keys(couponsData).forEach(couponId => {
+                        const card = document.querySelector(`.coupon-card[data-coupon-id="${couponId}"]`);
+                        if (card) {
+                            const quantity = couponsData[couponId]?.quantity ?? 0;
+                            updateQuantityDisplay(couponId, quantity);
+                        } else {
+                            console.warn(`Coupon data found for ID "${couponId}", but no matching card element.`);
+                        }
+                    });
+                    couponCards.forEach(card => {
+                        const couponId = card.dataset.couponId;
+                        if (couponId && (!couponsData || !couponsData[couponId])) {
+                             console.log(`Initializing missing coupon "${couponId}" in Firebase.`);
+                             couponsRef.child(couponId).set({
+                                 name: card.dataset.couponName || `Unnamed Coupon ${couponId}`,
+                                 quantity: 0
+                             }).catch(error => console.error(`Error initializing coupon ${couponId}:`, error));
+                             updateQuantityDisplay(couponId, 0);
+                        }
+                    });
+                } else {
+                    console.log("No 'coupons' data found in Firebase. Initializing...");
+                    const initialCoupons = {};
+                    couponCards.forEach(card => {
+                        const couponId = card.dataset.couponId;
+                        const couponName = card.dataset.couponName;
+                        if (couponId && couponName) {
+                            initialCoupons[couponId] = { name: couponName, quantity: 0 };
+                        }
+                    });
+                    couponsRef.set(initialCoupons).then(() => {
+                         console.log("Initial coupon data set.");
+                         Object.keys(initialCoupons).forEach(id => updateQuantityDisplay(id, 0));
+                    }).catch(error => console.error("Error setting initial coupons:", error));
+                }
+                 loadingIndicator.style.display = 'none';
+            }, (error) => {
+                console.error("Firebase coupon data read failed:", error);
+                loadingIndicator.textContent = '加载奖券数据失败，请检查网络或配置。';
+            });
+        }
+
+        function listenToLogChanges() {
+            logsRef.on('value', (snapshot) => {
+                const logsData = snapshot.val();
+                localActionLogs = {};
+                if (logsData) {
+                    Object.keys(logsData).forEach(dateStr => {
+                        const dateLogsFirebase = logsData[dateStr];
+                        if (dateLogsFirebase && typeof dateLogsFirebase === 'object') {
+                            localActionLogs[dateStr] = Object.values(dateLogsFirebase);
+                        }
+                    });
+                }
+                renderCalendar();
+                if (selectedDate) {
+                    displayLogsForDate(selectedDate);
+                }
+            }, (error) => {
+                console.error("Firebase log data read failed:", error);
+            });
+        }
+
+        // --- 初始化与事件监听 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadingIndicator.style.display = 'flex';
+            listenToCouponChanges();
+            listenToLogChanges();
+
+            const couponsContainer = document.querySelector('.lg\\:col-span-2 .grid');
+             if (couponsContainer) {
+                 couponsContainer.addEventListener('click', (event) => {
+                    const quantityButton = event.target.closest('.quantity-change');
+                    if (quantityButton) {
+                        handleQuantityChange(event);
+                        return;
+                    }
+                    const useButton = event.target.closest('.use-coupon');
+                    if (useButton) {
+                        handleUseCoupon(event);
+                        return;
+                    }
+                });
+             }
+
+            prevMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar();
+            });
+            nextMonthBtn.addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar();
+            });
+
+             renderCalendar();
+            selectedDateDisplay.textContent = '未选择日期';
+            logDisplayArea.innerHTML = '<p class="text-gray-500 italic">请在日历中选择一个日期查看奖券记录。</p>';
+        });
+
+    </script>
+
+</body>
+</html>
