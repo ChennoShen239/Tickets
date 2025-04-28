@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,56 +9,255 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #10b981;
+            --background-color: #f3f4f6;
+            --card-background: #ffffff;
+            --text-color: #1f2937;
+            --border-color: #e5e7eb;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #60a5fa;
+            --secondary-color: #34d399;
+            --background-color: #1f2937;
+            --card-background: #374151;
+            --text-color: #f3f4f6;
+            --border-color: #4b5563;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
+
+        .coupon-card {
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .coupon-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
         }
+
+        .emoji-container {
+            height: 12rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .emoji-container:hover {
+            transform: scale(1.05);
+        }
+
+        .quantity-change {
+            transition: all 0.2s ease;
+        }
+
+        .quantity-change:hover {
+            transform: scale(1.1);
+        }
+
+        .use-coupon {
+            transition: all 0.3s ease;
+        }
+
+        .use-coupon:hover {
+            transform: translateY(-2px);
+        }
+
         /* 日历样式 */
-        .calendar { width: 100%; background: white; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); overflow: hidden; }
-        .calendar-header { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background-color: #e5e7eb; border: 1px solid #e5e7eb; }
-        .calendar-day, .calendar-weekday { padding: 0.5rem; text-align: center; background-color: white; font-size: 0.875rem; min-height: 40px; display: flex; align-items: center; justify-content: center; position: relative; }
-        .calendar-weekday { font-weight: 600; background-color: #f9fafb; }
-        .calendar-day.other-month { color: #9ca3af; background-color: #f9fafb; }
-        .calendar-day.today { background-color: #bfdbfe; font-weight: bold; }
-        .calendar-day.selected { background-color: #3b82f6; color: white; border-radius: 50%; }
-        .calendar-day.has-log::after { content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%); width: 5px; height: 5px; background-color: #ef4444; border-radius: 50%; }
-        .calendar-day.selected.has-log::after { background-color: white; }
-        .calendar-day:not(.other-month):not(.selected):hover { background-color: #f3f4f6; cursor: pointer; border-radius: 50%; }
-        .log-area { margin-top: 1.5rem; background: white; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); min-height: 100px; }
-        .log-entry { font-size: 0.875rem; color: #4b5563; padding: 0.25rem 0; border-bottom: 1px solid #f3f4f6; }
-        .log-entry:last-child { border-bottom: none; }
-        /* 加载状态样式 */
+        .calendar { 
+            width: 100%; 
+            background: var(--card-background); 
+            border-radius: 0.5rem; 
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); 
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 0.75rem 1rem; 
+            background-color: var(--background-color); 
+            border-bottom: 1px solid var(--border-color); 
+        }
+
+        .calendar-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 1px; 
+            background-color: var(--border-color); 
+            border: 1px solid var(--border-color); 
+        }
+
+        .calendar-day, .calendar-weekday { 
+            padding: 0.5rem; 
+            text-align: center; 
+            background-color: var(--card-background); 
+            font-size: 0.875rem; 
+            min-height: 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .calendar-weekday { 
+            font-weight: 600; 
+            background-color: var(--background-color); 
+        }
+
+        .calendar-day.other-month { 
+            color: #9ca3af; 
+            background-color: var(--background-color); 
+        }
+
+        .calendar-day.today { 
+            background-color: var(--primary-color); 
+            color: white; 
+            font-weight: bold; 
+        }
+
+        .calendar-day.selected { 
+            background-color: var(--primary-color); 
+            color: white; 
+            border-radius: 50%; 
+            transform: scale(1.1);
+        }
+
+        .calendar-day.has-log::after { 
+            content: ''; 
+            position: absolute; 
+            bottom: 4px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            width: 5px; 
+            height: 5px; 
+            background-color: var(--secondary-color); 
+            border-radius: 50%; 
+        }
+
+        .calendar-day.selected.has-log::after { 
+            background-color: white; 
+        }
+
+        .calendar-day:not(.other-month):not(.selected):hover { 
+            background-color: var(--background-color); 
+            cursor: pointer; 
+            border-radius: 50%; 
+            transform: scale(1.05);
+        }
+
+        .log-area { 
+            margin-top: 1.5rem; 
+            background: var(--card-background); 
+            border-radius: 0.5rem; 
+            padding: 1rem; 
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); 
+            min-height: 100px; 
+            border: 1px solid var(--border-color);
+        }
+
+        .log-entry { 
+            font-size: 0.875rem; 
+            color: var(--text-color); 
+            padding: 0.25rem 0; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+
+        .log-entry:last-child { 
+            border-bottom: none; 
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--card-background);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 50;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        /* 加载动画 */
         .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(255, 255, 255, 0.8);
+            background-color: rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            font-size: 1.2rem;
-            color: #333;
         }
-        /* Emoji 容器样式 */
-        .emoji-container {
-            height: 12rem; /* h-48 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary-color);
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 奖券卡片动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .coupon-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* 日历动画 */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .calendar {
+            animation: slideIn 0.5s ease-out;
         }
     </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-8">
+<body class="p-4 md:p-8">
+    <!-- 主题切换按钮 -->
+    <button id="theme-toggle" class="theme-toggle">
+        <span class="light-icon">🌞</span>
+        <span class="dark-icon hidden">🌙</span>
+    </button>
 
     <div id="loading-indicator" class="loading-overlay">
-        正在加载数据...
+        <div class="loading-spinner"></div>
     </div>
 
     <div class="container mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -537,8 +736,37 @@
              renderCalendar();
             selectedDateDisplay.textContent = '未选择日期';
             logDisplayArea.innerHTML = '<p class="text-gray-500 italic">请在日历中选择一个日期查看奖券记录。</p>';
+
+            // 主题切换功能
+            const themeToggle = document.getElementById('theme-toggle');
+            const lightIcon = themeToggle.querySelector('.light-icon');
+            const darkIcon = themeToggle.querySelector('.dark-icon');
+            
+            // 检查本地存储中的主题设置
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // 更新图标显示
+            if (savedTheme === 'dark') {
+                lightIcon.classList.add('hidden');
+                darkIcon.classList.remove('hidden');
+            }
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                // 切换图标显示
+                lightIcon.classList.toggle('hidden');
+                darkIcon.classList.toggle('hidden');
+            });
         });
 
+        // 更新加载指示器样式
+        loadingIndicator.innerHTML = '<div class="loading-spinner"></div>';
     </script>
 
 </body>
