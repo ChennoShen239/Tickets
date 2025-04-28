@@ -249,7 +249,7 @@
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-6 md:p-12">
     <!-- 主题切换按钮 -->
     <button id="theme-toggle" class="theme-toggle">
         <span class="light-icon">🌞</span>
@@ -260,72 +260,103 @@
         <div class="loading-spinner"></div>
     </div>
 
-    <div class="container mx-auto max-w-7xl grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        <div class="lg:col-span-2">
-            <h1 class="text-3xl font-bold text-center text-gray-800 mb-10">楚楚的奖励兑换券们 🎟️✨</h1>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-                <div class="bg-white rounded-lg shadow-md overflow-hidden coupon-card transition-all duration-300 ease-in-out flex flex-col" data-coupon-id="cake" data-coupon-name="小蛋糕券">
-                     <div class="emoji-container bg-orange-100">
-                         <span class="text-7xl">🍰</span>
-                     </div>
-                    <div class="p-6 flex flex-col flex-grow">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-2">小蛋糕券</h2>
-                        <p class="text-gray-600 text-sm mb-4 flex-grow">凭此券可兑换一份美味的小蛋糕。松软香甜，给你带来甜蜜好心情！</p>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-gray-700 font-medium">当前数量:</span>
-                            <div class="flex items-center gap-2">
-                                <button class="quantity-change bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="decrease">-</button>
-                                <span class="quantity-display text-lg font-semibold w-8 text-center">...</span>
-                                <button class="quantity-change bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="increase">+</button>
-                            </div>
+    <div class="container mx-auto max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 space-y-6">
+                <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">楚楚的奖励兑换券们 🎟️✨</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="coupon-card rounded-xl shadow-xl overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-105 bg-gradient-to-tr from-orange-300 to-orange-500 text-white" data-coupon-id="cake" data-coupon-name="小蛋糕券">
+                        <div class="emoji-container bg-orange-100">
+                            <span class="text-7xl">🍰</span>
                         </div>
-                        <button class="use-coupon mt-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out w-full opacity-50 cursor-not-allowed" disabled>
-                            使用一张
-                        </button>
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h2 class="text-xl font-semibold text-white mb-2">小蛋糕券</h2>
+                            <p class="text-white text-opacity-90 text-sm mb-4">凭此券可兑换一份美味的小蛋糕。松软香甜，给你带来甜蜜好心情！</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-white font-medium">当前数量:</span>
+                                <div class="flex items-center gap-2">
+                                    <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="decrease">-</button>
+                                    <span class="quantity-display text-lg font-semibold w-8 text-center text-white">...</span>
+                                    <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="increase">+</button>
+                                </div>
+                            </div>
+                            <button class="use-coupon mt-auto bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out w-full opacity-50 cursor-not-allowed" disabled>
+                                使用一张
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="coupon-card rounded-xl shadow-xl overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-105 flex flex-col" data-coupon-id="salmon" data-coupon-name="三文鱼券">
+                        <div class="emoji-container bg-pink-100 rounded-t-xl">
+                            <span class="text-7xl">🍣</span>
+                        </div>
+                        <div class="p-6 flex flex-col flex-grow bg-gradient-to-tr from-pink-300 to-pink-500 text-white rounded-b-xl">
+                            <h2 class="text-xl font-semibold text-white mb-2">三文鱼券</h2>
+                            <p class="text-white text-opacity-90 text-sm mb-4">凭此券可享受新鲜美味的三文鱼料理。肉质鲜嫩，营养丰富！</p>
+                            <div class="flex items-center justify-between mb-4">
+                                <span class="text-white font-medium">当前数量:</span>
+                                <div class="flex items-center gap-2">
+                                    <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="decrease">-</button>
+                                    <span class="quantity-display text-lg font-semibold w-8 text-center text-white">...</span>
+                                    <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="increase">+</button>
+                                </div>
+                            </div>
+                            <button class="use-coupon mt-auto bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out w-full opacity-50 cursor-not-allowed" disabled>
+                                使用一张
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="bg-white rounded-lg shadow-md overflow-hidden coupon-card transition-all duration-300 ease-in-out flex flex-col" data-coupon-id="salmon" data-coupon-name="三文鱼券">
-                     <div class="emoji-container bg-teal-100">
-                         <span class="text-7xl">🍣</span>
-                     </div>
-                    <div class="p-6 flex flex-col flex-grow">
-                        <h2 class="text-xl font-semibold text-gray-800 mb-2">三文鱼券</h2>
-                        <p class="text-gray-600 text-sm mb-4 flex-grow">凭此券可享受新鲜美味的三文鱼料理。肉质鲜嫩，营养丰富！</p>
-                        <div class="flex items-center justify-between mb-4">
-                            <span class="text-gray-700 font-medium">当前数量:</span>
-                            <div class="flex items-center gap-2">
-                                <button class="quantity-change bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="decrease">-</button>
-                                <span class="quantity-display text-lg font-semibold w-8 text-center">...</span>
-                                <button class="quantity-change bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="increase">+</button>
-                            </div>
+                <!-- 留言板区域 -->
+                <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">留言板 💬</h2>
+                    
+                    <!-- 留言输入表单 -->
+                    <div class="mb-6">
+                        <div class="flex items-center gap-4 mb-4">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="speaker" value="楚楚" checked class="form-radio text-blue-500">
+                                <span class="text-gray-700">楚楚</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="speaker" value="高老师" class="form-radio text-blue-500">
+                                <span class="text-gray-700">高老师</span>
+                            </label>
                         </div>
-                         <button class="use-coupon mt-auto bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out w-full opacity-50 cursor-not-allowed" disabled>
-                            使用一张
-                        </button>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <input type="text" id="message-input" placeholder="输入留言..." 
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button id="send-message" 
+                                    class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
+                                发送
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 留言列表 -->
+                    <div id="message-list" class="space-y-4 max-h-96 overflow-y-auto">
+                        <!-- 留言将通过 JavaScript 动态添加 -->
                     </div>
                 </div>
-
             </div>
-        </div>
 
-        <div class="lg:col-span-1">
-             <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">奖券日历 🗓️</h2>
-             <div id="calendar-container" class="calendar mb-6">
-                <div class="calendar-header">
-                    <button id="prev-month" class="p-1 rounded hover:bg-gray-200">&lt;</button>
-                    <span id="current-month-year" class="font-semibold text-lg"></span>
-                    <button id="next-month" class="p-1 rounded hover:bg-gray-200">&gt;</button>
+            <div class="lg:col-span-1">
+                <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">奖券日历 🗓️</h2>
+                <div id="calendar-container" class="calendar mb-6">
+                    <div class="calendar-header">
+                        <button id="prev-month" class="p-1 rounded hover:bg-gray-200">&lt;</button>
+                        <span id="current-month-year" class="font-semibold text-lg"></span>
+                        <button id="next-month" class="p-1 rounded hover:bg-gray-200">&gt;</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-weekdays"></div>
+                    <div class="calendar-grid" id="calendar-days"></div>
                 </div>
-                <div class="calendar-grid" id="calendar-weekdays"></div>
-                <div class="calendar-grid" id="calendar-days"></div>
-             </div>
-             <h3 class="text-xl font-semibold text-gray-700 mb-3">奖券记录 📝 (<span id="selected-date-display">未选择日期</span>)</h3>
-             <div id="log-display-area" class="log-area">
-                 <p class="text-gray-500 italic">请在日历中选择一个日期查看奖券记录。</p>
-             </div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-3">奖券记录 📝 (<span id="selected-date-display">未选择日期</span>)</h3>
+                <div id="log-display-area" class="log-area">
+                    <p class="text-gray-500 italic">请在日历中选择一个日期查看奖券记录。</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -762,6 +793,252 @@
                 // 切换图标显示
                 lightIcon.classList.toggle('hidden');
                 darkIcon.classList.toggle('hidden');
+            });
+
+            // 留言板功能
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-message');
+            const messageList = document.getElementById('message-list');
+            const messagesRef = database.ref('messages');
+
+            // 发送留言
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                const speaker = document.querySelector('input[name="speaker"]:checked').value;
+                
+                if (!message) {
+                    alert('请输入留言内容');
+                    return;
+                }
+
+                messagesRef.push({
+                    speaker: speaker,
+                    message: message,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    messageInput.value = '';
+                }).catch(error => {
+                    console.error("Error sending message:", error);
+                    alert('发送失败，请重试');
+                });
+            }
+
+            // 发送回复
+            function sendReply(messageId, replyInput) {
+                const reply = replyInput.value.trim();
+                const speaker = document.querySelector('input[name="speaker"]:checked').value;
+                
+                if (!reply) {
+                    alert('请输入回复内容');
+                    return;
+                }
+
+                const replyRef = messagesRef.child(messageId).child('replies');
+                replyRef.push({
+                    speaker: speaker,
+                    message: reply,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    replyInput.value = '';
+                    const replyContainer = replyInput.closest('.reply-container');
+                    if (replyContainer) {
+                        replyContainer.classList.add('hidden');
+                    }
+                }).catch(error => {
+                    console.error("Error sending reply:", error);
+                    alert('发送失败，请重试');
+                });
+            }
+
+            // 添加发送按钮点击事件
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // 渲染留言
+            function displayMessage(messageData, messageId) {
+                // 容错处理
+                const speaker = messageData.speaker || '未知';
+                const message = messageData.message || '';
+                const timestampValue = messageData.timestamp;
+                let timestamp = '未知时间';
+                if (timestampValue && !isNaN(Number(timestampValue))) {
+                    timestamp = new Date(Number(timestampValue)).toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'bg-gray-50 p-4 rounded-lg';
+                messageDiv.dataset.messageId = messageId;
+                
+                // 创建回复按钮
+                const replyButton = document.createElement('button');
+                replyButton.className = 'text-sm text-blue-500 hover:text-blue-600 transition duration-300';
+                replyButton.textContent = '回复';
+                replyButton.addEventListener('click', () => {
+                    const replyContainer = messageDiv.querySelector('.reply-container');
+                    replyContainer.classList.toggle('hidden');
+                });
+
+                // 创建删除按钮
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'text-sm text-red-500 hover:text-red-600 transition duration-300 ml-2';
+                deleteButton.textContent = '删除';
+                deleteButton.addEventListener('click', () => {
+                    if (confirm('确定要删除这条留言吗？')) {
+                        messagesRef.child(messageId).remove()
+                            .catch(error => {
+                                console.error("Error deleting message:", error);
+                                alert('删除失败，请重试');
+                            });
+                    }
+                });
+
+                // 创建回复输入框容器
+                const replyContainer = document.createElement('div');
+                replyContainer.className = 'reply-container hidden mt-2 pl-4 border-l-2 border-gray-200';
+                
+                const replyInput = document.createElement('input');
+                replyInput.type = 'text';
+                replyInput.placeholder = '输入回复...';
+                replyInput.className = 'w-full px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm';
+                
+                const replyButtonContainer = document.createElement('div');
+                replyButtonContainer.className = 'flex justify-end mt-2 gap-2';
+                
+                const sendReplyButton = document.createElement('button');
+                sendReplyButton.className = 'px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 text-sm';
+                sendReplyButton.textContent = '发送';
+                sendReplyButton.addEventListener('click', () => sendReply(messageId, replyInput));
+                
+                const cancelButton = document.createElement('button');
+                cancelButton.className = 'px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-300 text-sm';
+                cancelButton.textContent = '取消';
+                cancelButton.addEventListener('click', () => {
+                    replyContainer.classList.add('hidden');
+                    replyInput.value = '';
+                });
+
+                replyButtonContainer.appendChild(sendReplyButton);
+                replyButtonContainer.appendChild(cancelButton);
+                
+                replyContainer.appendChild(replyInput);
+                replyContainer.appendChild(replyButtonContainer);
+
+                // 创建回复列表容器
+                const repliesContainer = document.createElement('div');
+                repliesContainer.className = 'replies-container mt-2 space-y-2';
+                
+                // 如果有回复，显示回复
+                if (messageData.replies) {
+                    Object.entries(messageData.replies).forEach(([replyId, replyData]) => {
+                        const replyDiv = createReplyElement(replyData, messageId, replyId);
+                        repliesContainer.appendChild(replyDiv);
+                    });
+                }
+
+                messageDiv.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-semibold ${speaker === '楚楚' ? 'text-pink-500' : 'text-blue-500'}">${speaker}</span>
+                        <span class="text-sm text-gray-500">${timestamp}</span>
+                    </div>
+                    <p class="text-gray-700">${message}</p>
+                    <div class="flex justify-end mt-2">
+                    </div>
+                `;
+
+                const buttonContainer = messageDiv.querySelector('.flex.justify-end');
+                buttonContainer.appendChild(replyButton);
+                buttonContainer.appendChild(deleteButton);
+                
+                messageDiv.appendChild(repliesContainer);
+                messageDiv.appendChild(replyContainer);
+                messageList.appendChild(messageDiv);
+                messageList.scrollTop = messageList.scrollHeight;
+            }
+
+            // 渲染回复
+            function createReplyElement(replyData, messageId, replyId) {
+                const speaker = replyData.speaker || '未知';
+                const message = replyData.message || '';
+                const timestampValue = replyData.timestamp;
+                let timestamp = '未知时间';
+                if (timestampValue && !isNaN(Number(timestampValue))) {
+                    timestamp = new Date(Number(timestampValue)).toLocaleString('zh-CN', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                }
+
+                const replyDiv = document.createElement('div');
+                replyDiv.className = 'bg-gray-100 p-3 rounded-lg ml-4';
+                replyDiv.dataset.replyId = replyId;
+                
+                // 创建删除按钮
+                const deleteButton = document.createElement('button');
+                deleteButton.className = 'text-xs text-red-500 hover:text-red-600 transition duration-300 ml-2';
+                deleteButton.textContent = '删除';
+                deleteButton.addEventListener('click', () => {
+                    if (confirm('确定要删除这条回复吗？')) {
+                        messagesRef.child(messageId).child('replies').child(replyId).remove()
+                            .catch(error => {
+                                console.error("Error deleting reply:", error);
+                                alert('删除失败，请重试');
+                            });
+                    }
+                });
+
+                replyDiv.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="font-semibold ${speaker === '楚楚' ? 'text-pink-500' : 'text-blue-500'}">${speaker}</span>
+                        <div class="flex items-center">
+                            <span class="text-xs text-gray-500">${timestamp}</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 text-sm">${message}</p>
+                `;
+
+                const timestampContainer = replyDiv.querySelector('.flex.items-center');
+                timestampContainer.appendChild(deleteButton);
+
+                return replyDiv;
+            }
+
+            // 只保留 child_added 和 child_changed 监听，不要用 once('value') 全量渲染
+            messageList.innerHTML = ''; // 每次页面加载时清空
+            messagesRef.off(); // 先移除所有监听，防止多次绑定
+
+            messagesRef.on('child_added', (snapshot) => {
+                const messageData = snapshot.val();
+                const messageId = snapshot.key;
+                displayMessage(messageData, messageId);
+            });
+
+            messagesRef.on('child_changed', (snapshot) => {
+                const messageData = snapshot.val();
+                const messageId = snapshot.key;
+                const messageDiv = document.querySelector(`[data-message-id=\"${messageId}\"]`);
+                if (messageDiv) {
+                    const repliesContainer = messageDiv.querySelector('.replies-container');
+                    repliesContainer.innerHTML = '';
+                    if (messageData.replies) {
+                        Object.entries(messageData.replies).forEach(([replyId, replyData]) => {
+                            const replyDiv = createReplyElement(replyData, messageId, replyId);
+                            repliesContainer.appendChild(replyDiv);
+                        });
+                    }
+                }
             });
         });
 
