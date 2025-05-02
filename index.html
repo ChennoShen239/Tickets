@@ -3,28 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>楚楚的奖励兑换券们 (Firebase)</title>
+    <title>奖励兑换券们 (Firebase)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* 基本样式和主题变量 */
         :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #10b981;
-            --background-color: #f3f4f6;
-            --card-background: #ffffff;
-            --text-color: #1f2937;
-            --border-color: #e5e7eb;
+            --primary-color: #3b82f6; /* Blue-500 */
+            --secondary-color: #10b981; /* Emerald-500 */
+            --background-color: #f3f4f6; /* Gray-100 */
+            --card-background: #ffffff; /* White */
+            --text-color: #1f2937; /* Gray-800 */
+            --border-color: #e5e7eb; /* Gray-200 */
+            --message-item-bg: #ffffff; /* White for light theme message items */
+            --reply-item-bg: #f9fafb; /* Gray-50 for light theme reply items */
         }
 
-        [data-theme="dark"] {
-            --primary-color: #60a5fa;
-            --secondary-color: #34d399;
-            --background-color: #1f2937;
-            --card-background: #374151;
-            --text-color: #f3f4f6;
-            --border-color: #4b5563;
+        html[data-theme="dark"] {
+            --primary-color: #60a5fa; /* Blue-400 */
+            --secondary-color: #34d399; /* Emerald-400 */
+            --background-color: #1f2937; /* Gray-800 */
+            --card-background: #374151; /* Gray-700 */
+            --text-color: #f3f4f6; /* Gray-100 */
+            --border-color: #4b5563; /* Gray-600 */
+            --message-item-bg: #4b5563; /* Gray-600 for dark theme message items */
+            --reply-item-bg: #374151; /* Gray-700 for dark theme reply items */
         }
 
         body {
@@ -34,11 +39,25 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* 奖券卡片样式 */
         .coupon-card {
             background-color: var(--card-background);
             border: 1px solid var(--border-color);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; /* Use flexbox for consistent height */
+            flex-direction: column; /* Stack elements vertically */
+            opacity: 0; /* Start hidden for animation */
+            animation: fadeIn 0.5s ease-out forwards; /* Use forwards to keep final state */
         }
+        /* Apply animation delay based on order within each grid */
+        .coupon-grid .coupon-card:nth-child(1) { animation-delay: 0.1s; }
+        .coupon-grid .coupon-card:nth-child(2) { animation-delay: 0.2s; }
+        .coupon-grid .coupon-card:nth-child(3) { animation-delay: 0.3s; }
+        .coupon-grid .coupon-card:nth-child(4) { animation-delay: 0.4s; }
+        /* Add more if needed */
+        .coupon-grid .coupon-card:nth-child(5) { animation-delay: 0.5s; }
+        .coupon-grid .coupon-card:nth-child(6) { animation-delay: 0.6s; }
+
 
         .coupon-card:hover {
             transform: translateY(-4px);
@@ -46,22 +65,33 @@
         }
 
         .emoji-container {
-            height: 12rem;
+            height: 10rem; /* Slightly reduced height */
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s ease;
+            border-top-left-radius: 0.75rem; /* Match card rounding */
+            border-top-right-radius: 0.75rem; /* Match card rounding */
         }
 
         .emoji-container:hover {
             transform: scale(1.05);
         }
 
+        .card-content {
+            padding: 1.5rem; /* p-6 */
+            flex-grow: 1; /* Allow content to fill remaining space */
+            display: flex;
+            flex-direction: column;
+            border-bottom-left-radius: 0.75rem; /* Match card rounding */
+            border-bottom-right-radius: 0.75rem; /* Match card rounding */
+        }
+
         .quantity-change {
             transition: all 0.2s ease;
         }
 
-        .quantity-change:hover {
+        .quantity-change:hover:not(:disabled) { /* Only scale if not disabled */
             transform: scale(1.1);
         }
 
@@ -69,116 +99,142 @@
             transition: all 0.3s ease;
         }
 
-        .use-coupon:hover {
+        .use-coupon:hover:not(:disabled) { /* Only transform if not disabled */
             transform: translateY(-2px);
         }
 
         /* 日历样式 */
-        .calendar { 
-            width: 100%; 
-            background: var(--card-background); 
-            border-radius: 0.5rem; 
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); 
+        .calendar {
+            width: 100%;
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             overflow: hidden;
             transition: all 0.3s ease;
+            border: 1px solid var(--border-color);
+            animation: slideIn 0.5s ease-out 0.4s forwards; /* Delay calendar animation */
+            opacity: 0; /* Start hidden */
         }
 
-        .calendar-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            padding: 0.75rem 1rem; 
-            background-color: var(--background-color); 
-            border-bottom: 1px solid var(--border-color); 
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background-color: var(--background-color);
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .calendar-grid { 
-            display: grid; 
-            grid-template-columns: repeat(7, 1fr); 
-            gap: 1px; 
-            background-color: var(--border-color); 
-            border: 1px solid var(--border-color); 
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background-color: var(--border-color);
+            border-top: 1px solid var(--border-color); /* Add top border */
+        }
+        #calendar-weekdays {
+             border-top: none; /* Remove top border for weekdays */
         }
 
-        .calendar-day, .calendar-weekday { 
-            padding: 0.5rem; 
-            text-align: center; 
-            background-color: var(--card-background); 
-            font-size: 0.875rem; 
-            min-height: 40px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
+
+        .calendar-day, .calendar-weekday {
+            padding: 0.5rem;
+            text-align: center;
+            background-color: var(--card-background);
+            font-size: 0.875rem;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
             transition: all 0.2s ease;
         }
 
-        .calendar-weekday { 
-            font-weight: 600; 
-            background-color: var(--background-color); 
+        .calendar-weekday {
+            font-weight: 600;
+            background-color: var(--background-color);
         }
 
-        .calendar-day.other-month { 
-            color: #9ca3af; 
-            background-color: var(--background-color); 
+        .calendar-day.other-month {
+            color: #9ca3af; /* Gray-400 */
+            background-color: var(--background-color);
+        }
+        html[data-theme="dark"] .calendar-day.other-month {
+             color: #6b7280; /* Dark Gray-500 */
+             background-color: #374151; /* Dark Gray-700 */
         }
 
-        .calendar-day.today { 
-            background-color: var(--primary-color); 
-            color: white; 
-            font-weight: bold; 
+
+        .calendar-day.today {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+            border-radius: 50%;
         }
 
-        .calendar-day.selected { 
-            background-color: var(--primary-color); 
-            color: white; 
-            border-radius: 50%; 
+        .calendar-day.selected {
+            background-color: var(--primary-color) !important; /* Ensure override */
+            color: white !important;
+            border-radius: 50%;
             transform: scale(1.1);
+            z-index: 10;
         }
 
-        .calendar-day.has-log::after { 
-            content: ''; 
-            position: absolute; 
-            bottom: 4px; 
-            left: 50%; 
-            transform: translateX(-50%); 
-            width: 5px; 
-            height: 5px; 
-            background-color: var(--secondary-color); 
-            border-radius: 50%; 
+        .calendar-day.has-log::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 5px;
+            background-color: var(--secondary-color);
+            border-radius: 50%;
         }
 
-        .calendar-day.selected.has-log::after { 
-            background-color: white; 
+        .calendar-day.selected.has-log::after {
+            background-color: white;
         }
 
-        .calendar-day:not(.other-month):not(.selected):hover { 
-            background-color: var(--background-color); 
-            cursor: pointer; 
-            border-radius: 50%; 
+        .calendar-day:not(.other-month):not(.selected):hover {
+            background-color: var(--background-color);
+            cursor: pointer;
+            border-radius: 50%;
             transform: scale(1.05);
         }
+        html[data-theme="dark"] .calendar-day:not(.other-month):not(.selected):hover {
+            background-color: #4b5563; /* Dark Gray-600 */
+        }
 
-        .log-area { 
-            margin-top: 1.5rem; 
-            background: var(--card-background); 
-            border-radius: 0.5rem; 
-            padding: 1rem; 
-            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); 
-            min-height: 100px; 
+        /* 日志区域 */
+        .log-area {
+            margin-top: 1.5rem;
+            background: var(--card-background);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            min-height: 100px;
             border: 1px solid var(--border-color);
+            color: var(--text-color); /* Ensure text color respects theme */
         }
 
-        .log-entry { 
-            font-size: 0.875rem; 
-            color: var(--text-color); 
-            padding: 0.25rem 0; 
-            border-bottom: 1px solid var(--border-color); 
+        .log-entry {
+            font-size: 0.875rem;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .log-entry:last-child { 
-            border-bottom: none; 
+        .log-entry:last-child {
+            border-bottom: none;
         }
+
+        .log-area p.italic {
+             color: #6b7280; /* Gray-500 */
+        }
+        html[data-theme="dark"] .log-area p.italic {
+             color: #9ca3af; /* Dark Gray-400 */
+        }
+
 
         /* 主题切换按钮 */
         .theme-toggle {
@@ -197,6 +253,7 @@
 
         .theme-toggle:hover {
             transform: scale(1.05);
+            background-color: var(--background-color); /* Subtle hover */
         }
 
         /* 加载动画 */
@@ -212,6 +269,12 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
+            transition: opacity 0.3s ease; /* Add transition for fade out */
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none; /* Prevent interaction when hidden */
         }
 
         .loading-spinner {
@@ -234,24 +297,98 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .coupon-card {
-            animation: fadeIn 0.5s ease-out;
-        }
-
         /* 日历动画 */
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(-20px); }
             to { opacity: 1; transform: translateX(0); }
         }
 
-        .calendar {
-            animation: slideIn 0.5s ease-out;
+        /* 留言板样式 */
+        .message-board {
+             background-color: var(--card-background);
+             border: 1px solid var(--border-color);
+             color: var(--text-color);
         }
+
+        .message-input-area input[type="text"],
+        .reply-container input[type="text"] {
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+        .message-input-area input[type="text"]::placeholder,
+        .reply-container input[type="text"]::placeholder {
+            color: #9ca3af; /* Gray-400 */
+        }
+        html[data-theme="dark"] .message-input-area input[type="text"]::placeholder,
+        html[data-theme="dark"] .reply-container input[type="text"]::placeholder {
+            color: #6b7280; /* Dark Gray-500 */
+        }
+
+        /* 使用 CSS 变量控制留言/回复背景 */
+        .message-item {
+            background-color: var(--message-item-bg);
+            border: 1px solid var(--border-color);
+        }
+        .reply-item {
+             background-color: var(--reply-item-bg);
+             border: 1px solid var(--border-color);
+        }
+
+        .message-speaker.chuchu { color: #ec4899; } /* Pink-500 */
+        .message-speaker.gao { color: #3b82f6; } /* Blue-500 */
+        html[data-theme="dark"] .message-speaker.chuchu { color: #f472b6; } /* Dark Pink-400 */
+        html[data-theme="dark"] .message-speaker.gao { color: #60a5fa; } /* Dark Blue-400 */
+
+        .message-timestamp, .reply-timestamp {
+            color: #6b7280; /* Gray-500 */
+        }
+         html[data-theme="dark"] .message-timestamp,
+         html[data-theme="dark"] .reply-timestamp {
+            color: #9ca3af; /* Dark Gray-400 */
+        }
+
+        .message-text, .reply-text {
+             color: var(--text-color);
+        }
+
+        .reply-button, .delete-button, .send-reply-button, .cancel-reply-button {
+             transition: color 0.2s ease, background-color 0.2s ease; /* Added background-color transition */
+        }
+        .reply-button { color: var(--primary-color); }
+        .reply-button:hover { color: #2563eb; } /* Blue-600 */
+        html[data-theme="dark"] .reply-button { color: #60a5fa; } /* Dark Blue-400 */
+        html[data-theme="dark"] .reply-button:hover { color: #93c5fd; } /* Dark Blue-300 */
+
+        .delete-button { color: #ef4444; } /* Red-500 */
+        .delete-button:hover { color: #dc2626; } /* Red-600 */
+        html[data-theme="dark"] .delete-button { color: #f87171; } /* Dark Red-400 */
+        html[data-theme="dark"] .delete-button:hover { color: #fda4af; } /* Dark Red-300 */
+
+        .send-reply-button { background-color: var(--primary-color); color: white; } /* Ensure text is white */
+        .send-reply-button:hover { background-color: #2563eb; } /* Blue-600 */
+        html[data-theme="dark"] .send-reply-button { background-color: #60a5fa; } /* Dark Blue-400 */
+        html[data-theme="dark"] .send-reply-button:hover { background-color: #93c5fd; } /* Dark Blue-300 */
+
+        .cancel-reply-button {
+             background-color: #e5e7eb; /* Gray-200 */
+             color: #374151; /* Gray-700 */
+        }
+        .cancel-reply-button:hover { background-color: #d1d5db; } /* Gray-300 */
+        html[data-theme="dark"] .cancel-reply-button {
+             background-color: #4b5563; /* Dark Gray-600 */
+             color: #f3f4f6; /* Dark Gray-100 */
+        }
+        html[data-theme="dark"] .cancel-reply-button:hover { background-color: #6b7280; } /* Dark Gray-500 */
+
+        .reply-container {
+             border-left-color: var(--border-color);
+        }
+
     </style>
 </head>
 <body class="p-6 md:p-12">
-    <!-- 主题切换按钮 -->
-    <button id="theme-toggle" class="theme-toggle">
+    <button id="theme-toggle" class="theme-toggle" aria-label="切换主题">
         <span class="light-icon">🌞</span>
         <span class="dark-icon hidden">🌙</span>
     </button>
@@ -261,100 +398,149 @@
     </div>
 
     <div class="container mx-auto max-w-7xl">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 space-y-6">
-                <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">楚楚的奖励兑换券们 🎟️✨</h1>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="coupon-card rounded-xl shadow-xl overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-105 bg-gradient-to-tr from-orange-300 to-orange-500 text-white" data-coupon-id="cake" data-coupon-name="小蛋糕券">
-                        <div class="emoji-container bg-orange-100">
-                            <span class="text-7xl">🍰</span>
-                        </div>
-                        <div class="p-6 flex flex-col flex-grow">
-                            <h2 class="text-xl font-semibold text-white mb-2">小蛋糕券</h2>
-                            <p class="text-white text-opacity-90 text-sm mb-4">凭此券可兑换一份美味的小蛋糕。松软香甜，给你带来甜蜜好心情！</p>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-white font-medium">当前数量:</span>
-                                <div class="flex items-center gap-2">
-                                    <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="decrease">-</button>
-                                    <span class="quantity-display text-lg font-semibold w-8 text-center text-white">...</span>
-                                    <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="increase">+</button>
-                                </div>
-                            </div>
-                            <button class="use-coupon mt-auto bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out w-full opacity-50 cursor-not-allowed" disabled>
-                                使用一张
-                            </button>
-                        </div>
-                    </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8"> <div class="lg:col-span-2 space-y-8">
 
-                    <div class="coupon-card rounded-xl shadow-xl overflow-hidden transition-all duration-300 ease-in-out transform hover:scale-105 flex flex-col" data-coupon-id="salmon" data-coupon-name="三文鱼券">
-                        <div class="emoji-container bg-pink-100 rounded-t-xl">
-                            <span class="text-7xl">🍣</span>
-                        </div>
-                        <div class="p-6 flex flex-col flex-grow bg-gradient-to-tr from-pink-300 to-pink-500 text-white rounded-b-xl">
-                            <h2 class="text-xl font-semibold text-white mb-2">三文鱼券</h2>
-                            <p class="text-white text-opacity-90 text-sm mb-4">凭此券可享受新鲜美味的三文鱼料理。肉质鲜嫩，营养丰富！</p>
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="text-white font-medium">当前数量:</span>
-                                <div class="flex items-center gap-2">
-                                    <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="decrease">-</button>
-                                    <span class="quantity-display text-lg font-semibold w-8 text-center text-white">...</span>
-                                    <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center transition duration-150 ease-in-out" data-action="increase">+</button>
-                                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-center mb-6">楚楚的奖励兑换券们 🎟️✨</h1>
+                    <div class="coupon-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="coupon-card rounded-xl shadow-lg overflow-hidden" data-coupon-id="cake" data-coupon-name="小蛋糕券">
+                            <div class="emoji-container bg-orange-100">
+                                <span class="text-7xl">🍰</span>
                             </div>
-                            <button class="use-coupon mt-auto bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out w-full opacity-50 cursor-not-allowed" disabled>
-                                使用一张
-                            </button>
+                            <div class="card-content bg-gradient-to-br from-orange-300 to-orange-500 text-white">
+                                <h2 class="text-xl font-semibold mb-2">小蛋糕券</h2>
+                                <p class="text-sm text-white text-opacity-90 mb-4 flex-grow">凭此券可兑换一份美味的小蛋糕。松软香甜，给你带来甜蜜好心情！</p>
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="font-medium">当前数量:</span>
+                                    <div class="flex items-center gap-2">
+                                        <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold w-6 h-6 rounded-full flex items-center justify-center" data-action="decrease" aria-label="减少小蛋糕券数量">-</button>
+                                        <span class="quantity-display text-lg font-semibold w-8 text-center">...</span>
+                                        <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center" data-action="increase" aria-label="增加小蛋糕券数量">+</button>
+                                    </div>
+                                </div>
+                                <button class="use-coupon mt-auto bg-white bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg w-full" disabled>
+                                    使用一张
+                                </button>
+                            </div>
                         </div>
-                    </div>
+
+                        <div class="coupon-card rounded-xl shadow-lg overflow-hidden" data-coupon-id="salmon" data-coupon-name="三文鱼券">
+                            <div class="emoji-container bg-pink-100">
+                                <span class="text-7xl">🍣</span>
+                            </div>
+                            <div class="card-content bg-gradient-to-br from-pink-300 to-pink-500 text-white">
+                                <h2 class="text-xl font-semibold mb-2">三文鱼券</h2>
+                                <p class="text-sm text-white text-opacity-90 mb-4 flex-grow">凭此券可享受新鲜美味的三文鱼料理。肉质鲜嫩，营养丰富！</p>
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="font-medium">当前数量:</span>
+                                    <div class="flex items-center gap-2">
+                                        <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold w-6 h-6 rounded-full flex items-center justify-center" data-action="decrease" aria-label="减少三文鱼券数量">-</button>
+                                        <span class="quantity-display text-lg font-semibold w-8 text-center">...</span>
+                                        <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center" data-action="increase" aria-label="增加三文鱼券数量">+</button>
+                                    </div>
+                                </div>
+                                <button class="use-coupon mt-auto bg-white bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg w-full" disabled>
+                                    使用一张
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="coupon-card rounded-xl shadow-lg overflow-hidden" data-coupon-id="milk-tea" data-coupon-name="奶茶券">
+                            <div class="emoji-container bg-purple-100">
+                                <span class="text-7xl">🥤</span>
+                            </div>
+                            <div class="card-content bg-gradient-to-br from-purple-300 to-purple-500 text-white">
+                                <h2 class="text-xl font-semibold mb-2">奶茶券</h2>
+                                <p class="text-sm text-white text-opacity-90 mb-4 flex-grow">凭此券可兑换一杯香醇丝滑的奶茶，享受悠闲时光！</p>
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="font-medium">当前数量:</span>
+                                    <div class="flex items-center gap-2">
+                                        <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold w-6 h-6 rounded-full flex items-center justify-center" data-action="decrease" aria-label="减少奶茶券数量">-</button>
+                                        <span class="quantity-display text-lg font-semibold w-8 text-center">...</span>
+                                        <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center" data-action="increase" aria-label="增加奶茶券数量">+</button>
+                                    </div>
+                                </div>
+                                <button class="use-coupon mt-auto bg-white bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg w-full" disabled>
+                                    使用一张
+                                </button>
+                            </div>
+                        </div>
+                        </div>
                 </div>
 
-                <!-- 留言板区域 -->
-                <div class="mt-6 bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">留言板 💬</h2>
-                    
-                    <!-- 留言输入表单 -->
-                    <div class="mb-6">
+                <div class="mt-12">
+                    <h1 class="text-3xl font-bold text-center mb-6">高老师的奖励兑换券们 🍦🎁</h1>
+                    <div class="coupon-grid grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div class="coupon-card rounded-xl shadow-lg overflow-hidden" data-coupon-id="ice-cream" data-coupon-name="冰淇凌券">
+                            <div class="emoji-container bg-blue-100">
+                                <span class="text-7xl">🍦</span>
+                            </div>
+                            <div class="card-content bg-gradient-to-br from-blue-300 to-blue-500 text-white">
+                                <h2 class="text-xl font-semibold mb-2">冰淇凌券</h2>
+                                <p class="text-sm text-white text-opacity-90 mb-4 flex-grow">凭此券可兑换一支清凉可口的冰淇凌，夏日解暑必备！</p>
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="font-medium">当前数量:</span>
+                                    <div class="flex items-center gap-2">
+                                        <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold w-6 h-6 rounded-full flex items-center justify-center" data-action="decrease" aria-label="减少冰淇凌券数量">-</button>
+                                        <span class="quantity-display text-lg font-semibold w-8 text-center">...</span>
+                                        <button class="quantity-change bg-white bg-opacity-20 hover:bg-opacity-30 text-white font-bold w-6 h-6 rounded-full flex items-center justify-center" data-action="increase" aria-label="增加冰淇凌券数量">+</button>
+                                    </div>
+                                </div>
+                                <button class="use-coupon mt-auto bg-white bg-opacity-20 hover:bg-opacity-30 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg w-full" disabled>
+                                    使用一张
+                                </button>
+                            </div>
+                        </div>
+                        </div>
+                </div>
+
+
+                <div class="message-board mt-12 rounded-lg shadow-md p-6">
+                    <h2 class="text-2xl font-bold mb-4">留言板 💬</h2>
+
+                    <div class="message-input-area mb-6">
                         <div class="flex items-center gap-4 mb-4">
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="speaker" value="楚楚" checked class="form-radio text-blue-500">
-                                <span class="text-gray-700">楚楚</span>
+                                <input type="radio" name="speaker" value="楚楚" checked class="form-radio text-pink-500 focus:ring-pink-500">
+                                <span class="message-speaker chuchu">楚楚</span>
                             </label>
                             <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="speaker" value="高老师" class="form-radio text-blue-500">
-                                <span class="text-gray-700">高老师</span>
+                                <input type="radio" name="speaker" value="高老师" class="form-radio text-blue-500 focus:ring-blue-500">
+                                <span class="message-speaker gao">高老师</span>
                             </label>
                         </div>
                         <div class="flex flex-col sm:flex-row gap-4">
-                            <input type="text" id="message-input" placeholder="输入留言..." 
-                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <button id="send-message" 
+                            <input type="text" id="message-input" placeholder="输入留言..."
+                                   class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button id="send-message"
                                     class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300">
                                 发送
                             </button>
                         </div>
                     </div>
 
-                    <!-- 留言列表 -->
-                    <div id="message-list" class="space-y-4 max-h-96 overflow-y-auto">
-                        <!-- 留言将通过 JavaScript 动态添加 -->
+                    <div id="message-list" class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                        <p class="text-center text-gray-500 italic hidden" id="no-messages">还没有留言哦~</p>
                     </div>
                 </div>
             </div>
 
-            <div class="lg:col-span-1">
-                <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">奖券日历 🗓️</h2>
-                <div id="calendar-container" class="calendar mb-6">
+            <div class="lg:col-span-1 space-y-6">
+                <h2 class="text-2xl font-bold text-center mb-0">奖券日历 🗓️</h2>
+                <div id="calendar-container" class="calendar">
                     <div class="calendar-header">
-                        <button id="prev-month" class="p-1 rounded hover:bg-gray-200">&lt;</button>
+                        <button id="prev-month" class="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600" aria-label="上个月">&lt;</button>
                         <span id="current-month-year" class="font-semibold text-lg"></span>
-                        <button id="next-month" class="p-1 rounded hover:bg-gray-200">&gt;</button>
+                        <button id="next-month" class="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600" aria-label="下个月">&gt;</button>
                     </div>
                     <div class="calendar-grid" id="calendar-weekdays"></div>
                     <div class="calendar-grid" id="calendar-days"></div>
                 </div>
-                <h3 class="text-xl font-semibold text-gray-700 mb-3">奖券记录 📝 (<span id="selected-date-display">未选择日期</span>)</h3>
-                <div id="log-display-area" class="log-area">
-                    <p class="text-gray-500 italic">请在日历中选择一个日期查看奖券记录。</p>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">奖券记录 📝 (<span id="selected-date-display">未选择日期</span>)</h3>
+                    <div id="log-display-area" class="log-area">
+                        <p class="italic">请在日历中选择一个日期查看奖券记录。</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -366,7 +552,7 @@
     <script>
         // --- Firebase 配置 ---
         const firebaseConfig = {
-          apiKey: "AIzaSyBxzlxj-Sva3kVxhsWHI_2BGHJeYPHGS2s",
+          apiKey: "AIzaSyBxzlxj-Sva3kVxhsWHI_2BGHJeYPHGS2s", // 注意：在生产环境中保护好你的 API Key
           authDomain: "tickets-91f95.firebaseapp.com",
           databaseURL: "https://tickets-91f95-default-rtdb.firebaseio.com",
           projectId: "tickets-91f95",
@@ -377,16 +563,25 @@
         };
 
         // --- 初始化 Firebase ---
-        firebase.initializeApp(firebaseConfig);
+        try {
+            if (!firebase.apps.length) { // 防止重复初始化
+                 firebase.initializeApp(firebaseConfig);
+            }
+        } catch (e) {
+            console.error("Firebase initialization error:", e);
+            alert("无法连接到数据库，请检查网络或配置。");
+        }
         const database = firebase.database();
 
         // --- 全局状态 ---
         let currentDate = new Date();
-        let selectedDate = null;
-        let localActionLogs = {};
+        let selectedDate = null; // 格式: YYYY-MM-DD
+        let localActionLogs = {}; // 缓存从 Firebase 获取的日志 { "YYYY-MM-DD": [log1, log2] }
+        let allCouponData = {}; // 缓存所有奖券信息 { "couponId": { name: "...", quantity: ... } }
 
         // --- DOM 元素引用 ---
-        const couponCards = document.querySelectorAll('.coupon-card');
+        // UPDATED: Select ALL coupon grids
+        const couponGrids = document.querySelectorAll('.coupon-grid');
         const calendarContainer = document.getElementById('calendar-container');
         const calendarDaysGrid = document.getElementById('calendar-days');
         const calendarWeekdaysGrid = document.getElementById('calendar-weekdays');
@@ -396,57 +591,47 @@
         const logDisplayArea = document.getElementById('log-display-area');
         const selectedDateDisplay = document.getElementById('selected-date-display');
         const loadingIndicator = document.getElementById('loading-indicator');
+        const themeToggle = document.getElementById('theme-toggle');
+        const lightIcon = themeToggle.querySelector('.light-icon');
+        const darkIcon = themeToggle.querySelector('.dark-icon');
+        const messageInput = document.getElementById('message-input');
+        const sendMessageButton = document.getElementById('send-message');
+        const messageList = document.getElementById('message-list');
+        const noMessagesIndicator = document.getElementById('no-messages');
 
         // --- Firebase 数据库引用 ---
         const couponsRef = database.ref('coupons');
         const logsRef = database.ref('logs');
+        const messagesRef = database.ref('messages');
 
-        // --- 功能函数 ---
+        // --- Helper Functions ---
 
         /**
-         * 更新奖券数量显示和按钮状态
-         * @param {string} couponId - 奖券ID
-         * @param {number} quantity - 数量
+         * 显示加载指示器
          */
-        function updateQuantityDisplay(couponId, quantity) {
-            const card = document.querySelector(`.coupon-card[data-coupon-id="${couponId}"]`);
-            if (card) {
-                const quantityEl = card.querySelector('.quantity-display');
-                const decreaseBtn = card.querySelector('.quantity-change[data-action="decrease"]');
-                const useBtn = card.querySelector('.use-coupon');
+        function showLoading() {
+            if (loadingIndicator) loadingIndicator.classList.remove('hidden');
+        }
 
-                const numQuantity = Number(quantity);
-                const displayQuantity = isNaN(numQuantity) ? 0 : numQuantity;
-
-                quantityEl.textContent = displayQuantity;
-                const disable = displayQuantity <= 0;
-
-                if (decreaseBtn) {
-                    decreaseBtn.disabled = disable;
-                    decreaseBtn.classList.toggle('opacity-50', disable);
-                    decreaseBtn.classList.toggle('cursor-not-allowed', disable);
-                }
-                if (useBtn) {
-                    useBtn.disabled = disable;
-                    useBtn.classList.toggle('opacity-50', disable);
-                    useBtn.classList.toggle('cursor-not-allowed', disable);
-                }
-            }
+        /**
+         * 隐藏加载指示器
+         */
+        function hideLoading() {
+            // Delay hiding slightly to prevent flickering on fast loads
+            setTimeout(() => {
+                 if (loadingIndicator) loadingIndicator.classList.add('hidden');
+            }, 150); // Adjust delay as needed
         }
 
         /**
          * 获取格式化的日期字符串 (YYYY-MM-DD)
          * @param {Date} date - 日期对象
-         * @returns {string}
+         * @returns {string} - 格式化后的日期字符串，或今天的日期（如果输入无效）
          */
         function getFormattedDate(date) {
             if (!(date instanceof Date) || isNaN(date)) {
-                console.error("Invalid date provided to getFormattedDate:", date);
-                const today = new Date();
-                 const year = today.getFullYear();
-                 const month = String(today.getMonth() + 1).padStart(2, '0');
-                 const day = String(today.getDate()).padStart(2, '0');
-                 return `${year}-${month}-${day}`;
+                console.warn("Invalid date provided to getFormattedDate, using today:", date);
+                date = new Date(); // Fallback to today if date is invalid
             }
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -455,128 +640,213 @@
         }
 
         /**
-         * 记录操作日志到 Firebase
-         * @param {string} couponName - 奖券名称
-         * @param {string} actionType - 操作类型
-         * @param {number} quantityChange - 数量变化
+         * 更新特定奖券卡片的数量显示和按钮状态
+         * @param {string} couponId - 奖券ID
+         * @param {number} quantity - 数量
          */
-        function logActionToFirebase(couponName, actionType, quantityChange) {
-            const todayStr = getFormattedDate(new Date());
-            const timeStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit'});
-            let message = `${timeStr} - `;
+        function updateQuantityDisplay(couponId, quantity) {
+            // Find the card across all grids
+            const card = document.querySelector(`.coupon-card[data-coupon-id="${couponId}"]`);
+            if (!card) {
+                // It's normal for this to happen briefly if Firebase loads before DOM fully parsed
+                // console.warn(`Card element not found for coupon ID: ${couponId}`);
+                return;
+            }
 
-            if (actionType === '增加') message += `增加了 ${quantityChange} 个 ${couponName}`;
-            else if (actionType === '减少') message += `减少了 ${-quantityChange} 个 ${couponName}`;
-            else if (actionType === '使用') message += `使用了 1 个 ${couponName}`;
+            const quantityEl = card.querySelector('.quantity-display');
+            const decreaseBtn = card.querySelector('.quantity-change[data-action="decrease"]');
+            const useBtn = card.querySelector('.use-coupon');
 
-            const dateLogRef = logsRef.child(todayStr);
-            dateLogRef.push({
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                message: message
-            }).catch(error => {
-                console.error("Error writing log to Firebase:", error);
-            });
+            const numQuantity = Number(quantity);
+            const displayQuantity = isNaN(numQuantity) ? 0 : numQuantity; // Default to 0 if NaN
+
+            if (quantityEl) quantityEl.textContent = displayQuantity;
+
+            const disable = displayQuantity <= 0;
+
+            if (decreaseBtn) decreaseBtn.disabled = disable;
+            if (useBtn) useBtn.disabled = disable;
         }
 
         /**
-         * 处理数量变更按钮点击
+         * 记录操作日志到 Firebase 和本地缓存
+         * @param {string} couponId - 奖券 ID
+         * @param {string} actionType - 操作类型 ('增加', '减少', '使用')
+         * @param {number} quantityChange - 数量变化 (+1, -1)
+         */
+        function logAction(couponId, actionType, quantityChange) {
+            const couponName = allCouponData[couponId]?.name || couponId; // Get name from cache or use ID
+            if (!couponName) {
+                console.warn(`Cannot log action for unknown coupon ID: ${couponId}`);
+                return; // Don't log if name is missing
+            }
+
+            const todayStr = getFormattedDate(new Date());
+            const timeStr = new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            let message = `${timeStr} - `;
+
+            switch (actionType) {
+                case '增加':
+                    message += `增加了 ${quantityChange} 个 ${couponName}`;
+                    break;
+                case '减少':
+                    message += `减少了 ${-quantityChange} 个 ${couponName}`; // Show positive number
+                    break;
+                case '使用':
+                    message += `使用了 1 个 ${couponName}`;
+                    break;
+                default:
+                    console.warn("Unknown action type for logging:", actionType);
+                    return; // Don't log unknown actions
+            }
+
+            const logEntry = {
+                timestamp: firebase.database.ServerValue.TIMESTAMP, // Use server timestamp for consistency
+                message: message,
+                couponId: couponId, // Optionally store couponId for filtering
+                action: actionType // Optionally store action type
+            };
+
+            // 1. Push to Firebase
+            const dateLogRef = logsRef.child(todayStr);
+            dateLogRef.push(logEntry).catch(error => {
+                console.error("Error writing log to Firebase:", error);
+                // Maybe show a user-facing error here
+            });
+
+            // 2. Update local cache immediately for responsiveness
+            if (!localActionLogs[todayStr]) {
+                localActionLogs[todayStr] = [];
+            }
+            // Add a client-side timestamp for immediate sorting if needed, Firebase timestamp will eventually overwrite
+            // Use spread syntax to avoid modifying original logEntry if it's used elsewhere
+            localActionLogs[todayStr].push({ ...logEntry, timestamp: Date.now() });
+
+            // 3. Re-render calendar and log display if today is selected
+            renderCalendar(); // Update 'has-log' indicator
+            if (selectedDate === todayStr) {
+                displayLogsForDate(todayStr);
+            }
+        }
+
+        /**
+         * 处理数量变更 (+/-) 按钮点击 (Event Delegation)
          * @param {Event} event
          */
         function handleQuantityChange(event) {
             const button = event.target.closest('.quantity-change');
             if (!button || button.disabled) return;
+
             const card = button.closest('.coupon-card');
             if (!card) return;
+
             const couponId = card.dataset.couponId;
-            const couponName = card.dataset.couponName;
             const action = button.dataset.action;
-            if (!couponId || !couponName) {
-                console.error("Missing coupon ID or name on card:", card);
+
+            if (!couponId) {
+                console.error("Missing coupon ID on card:", card);
                 return;
             }
-            const couponQuantityRef = couponsRef.child(couponId).child('quantity');
 
+            const couponQuantityRef = couponsRef.child(couponId).child('quantity');
+            let change = 0;
+            let actionType = '';
+
+            if (action === 'increase') {
+                change = 1;
+                actionType = '增加';
+            } else if (action === 'decrease') {
+                change = -1;
+                actionType = '减少';
+            } else {
+                return; // Should not happen
+            }
+
+            // Use transaction for safe increment/decrement
             couponQuantityRef.transaction(currentQuantity => {
-                 let numQuantity = Number(currentQuantity);
-                 if (currentQuantity === null || isNaN(numQuantity)) {
-                     numQuantity = 0;
-                 }
+                const numQuantity = Number(currentQuantity ?? 0); // Default to 0 if null/undefined
+                if (isNaN(numQuantity)) return 0; // Reset if somehow NaN
+
                 if (action === 'increase') {
                     return numQuantity + 1;
                 } else if (action === 'decrease') {
-                    if (numQuantity > 0) {
-                        return numQuantity - 1;
-                    } else {
-                        return; // Abort transaction
-                    }
-                } else {
-                    return; // Abort transaction
+                    return Math.max(0, numQuantity - 1); // Ensure quantity doesn't go below 0
                 }
+                return; // Abort if action is not increase/decrease
             }, (error, committed, snapshot) => {
                 if (error) {
                     console.error("Quantity change transaction failed:", error);
-                } else if (committed) {
-                    let change = 0;
-                    let actionType = '';
-                    if (action === 'increase') {
-                        change = 1;
-                        actionType = '增加';
-                    } else if (action === 'decrease') {
-                        change = -1;
-                        actionType = '减少';
-                    }
-                    if (actionType) {
-                         logActionToFirebase(couponName, actionType, change);
-                    }
+                    alert("更新数量失败，请稍后重试。");
+                } else if (committed && actionType) {
+                    // Log only if the transaction was successful and committed
+                    logAction(couponId, actionType, change);
+                } else if (!committed && action === 'decrease') {
+                    // Transaction likely aborted because quantity was already 0
+                    console.log("Decrease aborted, quantity likely zero.");
                 }
             });
         }
 
         /**
-         * 处理使用奖券按钮点击
+         * 处理 "使用一张" 按钮点击 (Event Delegation)
          * @param {Event} event
          */
         function handleUseCoupon(event) {
             const button = event.target.closest('.use-coupon');
             if (!button || button.disabled) return;
+
             const card = button.closest('.coupon-card');
             if (!card) return;
+
             const couponId = card.dataset.couponId;
-            const couponName = card.dataset.couponName;
-            if (!couponId || !couponName) {
-                console.error("Missing coupon ID or name on card:", card);
+            if (!couponId) {
+                console.error("Missing coupon ID on card for 'use' action:", card);
                 return;
             }
+
             const couponQuantityRef = couponsRef.child(couponId).child('quantity');
 
+            // Use transaction to safely decrement
             couponQuantityRef.transaction(currentQuantity => {
-                 let numQuantity = Number(currentQuantity);
-                 if (currentQuantity === null || isNaN(numQuantity)) {
-                     numQuantity = 0;
-                 }
-                if (numQuantity > 0) {
-                    return numQuantity - 1;
-                } else {
-                    return; // Abort transaction
+                const numQuantity = Number(currentQuantity ?? 0);
+                if (isNaN(numQuantity) || numQuantity <= 0) {
+                    return; // Abort transaction if not positive
                 }
+                return numQuantity - 1;
             }, (error, committed, snapshot) => {
                 if (error) {
                     console.error("Use coupon transaction failed:", error);
+                    alert("使用奖券失败，请稍后重试。");
                 } else if (committed) {
-                    logActionToFirebase(couponName, '使用', -1);
+                    // Log the 'use' action if successful
+                    logAction(couponId, '使用', -1);
+                } else {
+                    // Transaction likely aborted because quantity was zero or became zero concurrently
+                    console.log("Use coupon aborted, quantity likely zero.");
+                    // Optionally provide user feedback
+                    // alert("该奖券数量已为 0！");
                 }
             });
         }
 
-        // --- 日历渲染和日志显示 ---
 
+        // --- Calendar Rendering and Log Display ---
+
+        /**
+         * 渲染指定月份的日历
+         */
         function renderCalendar() {
-            calendarDaysGrid.innerHTML = '';
-            calendarWeekdaysGrid.innerHTML = '';
+            if (!calendarDaysGrid || !calendarWeekdaysGrid || !currentMonthYearEl) return; // Guard clause
+
+            calendarDaysGrid.innerHTML = ''; // Clear previous days
+            calendarWeekdaysGrid.innerHTML = ''; // Clear previous weekdays
             const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
+            const month = currentDate.getMonth(); // 0-indexed
+
+            // Display current month and year
             currentMonthYearEl.textContent = `${year}年${month + 1}月`;
 
+            // Render weekdays (Mon-Sun)
             const weekdays = ['一', '二', '三', '四', '五', '六', '日'];
             weekdays.forEach(day => {
                 const weekdayEl = document.createElement('div');
@@ -585,18 +855,22 @@
                 calendarWeekdaysGrid.appendChild(weekdayEl);
             });
 
+            // Calculate calendar grid start day
             const firstDayOfMonth = new Date(year, month, 1);
             const lastDayOfMonth = new Date(year, month + 1, 0);
             const daysInMonth = lastDayOfMonth.getDate();
-            let startDayOfWeek = firstDayOfMonth.getDay();
-            startDayOfWeek = (startDayOfWeek === 0) ? 6 : startDayOfWeek - 1;
+
+            // Adjust start day: 0 (Sun) -> 6, 1 (Mon) -> 0, ..., 6 (Sat) -> 5
+            let startDayIndex = firstDayOfMonth.getDay();
+            startDayIndex = (startDayIndex === 0) ? 6 : startDayIndex - 1;
 
             const today = new Date();
             const todayStr = getFormattedDate(today);
 
+            // Render days from the previous month
             const lastDayOfPrevMonth = new Date(year, month, 0);
             const daysInPrevMonth = lastDayOfPrevMonth.getDate();
-            for (let i = startDayOfWeek - 1; i >= 0; i--) {
+            for (let i = startDayIndex - 1; i >= 0; i--) {
                 const day = daysInPrevMonth - i;
                 const date = new Date(year, month - 1, day);
                 const dateStr = getFormattedDate(date);
@@ -604,19 +878,24 @@
                 calendarDaysGrid.appendChild(dayEl);
             }
 
+            // Render days of the current month
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(year, month, day);
                 const dateStr = getFormattedDate(date);
                 const classes = [];
                 if (dateStr === todayStr) classes.push('today');
                 if (dateStr === selectedDate) classes.push('selected');
-                if (localActionLogs[dateStr] && localActionLogs[dateStr].length > 0) classes.push('has-log');
+                 // Check localActionLogs cache for logs on this date
+                if (localActionLogs[dateStr] && localActionLogs[dateStr].length > 0) {
+                    classes.push('has-log');
+                }
                 const dayEl = createDayElement(day, dateStr, classes);
                 calendarDaysGrid.appendChild(dayEl);
             }
 
+            // Render days from the next month to fill the grid (usually 42 cells)
             const totalCells = calendarDaysGrid.children.length;
-            const nextMonthDaysNeeded = 42 - totalCells;
+            const nextMonthDaysNeeded = (totalCells < 35 ? 35 : 42) - totalCells; // Ensure 5 or 6 rows
             for (let i = 1; i <= nextMonthDaysNeeded; i++) {
                  const date = new Date(year, month + 1, i);
                  const dateStr = getFormattedDate(date);
@@ -625,31 +904,65 @@
             }
         }
 
+        /**
+         * 创建日历中的单个日期元素
+         * @param {number} dayNumber - 日期数字
+         * @param {string} dateStr - YYYY-MM-DD 格式的日期字符串
+         * @param {string[]} classes - 要添加到元素的 CSS 类数组
+         * @returns {HTMLDivElement} - 创建的日期元素
+         */
         function createDayElement(dayNumber, dateStr, classes = []) {
             const dayEl = document.createElement('div');
             dayEl.classList.add('calendar-day', ...classes);
             dayEl.textContent = dayNumber;
-            dayEl.dataset.date = dateStr;
+            dayEl.dataset.date = dateStr; // Store date string for easy access
+
+            // Add click listener only for days in the current month
             if (!classes.includes('other-month')) {
                 dayEl.addEventListener('click', handleDateClick);
+                dayEl.setAttribute('role', 'button');
+                dayEl.setAttribute('tabindex', '0'); // Make it focusable
+                dayEl.setAttribute('aria-label', `${dateStr} ${localActionLogs[dateStr] ? '(有记录)' : ''}`);
+            } else {
+                 dayEl.setAttribute('aria-disabled', 'true');
             }
+
             return dayEl;
         }
 
+        /**
+         * 处理日历日期点击事件
+         * @param {Event} event
+         */
         function handleDateClick(event) {
-            const clickedDateStr = event.target.dataset.date;
-            if (!clickedDateStr) return;
+            const target = event.currentTarget; // Use currentTarget for the element the listener is attached to
+            const clickedDateStr = target.dataset.date;
+            if (!clickedDateStr || !selectedDateDisplay) return; // Guard clause
+
+            // Update selected date state
             selectedDate = clickedDateStr;
-            selectedDateDisplay.textContent = clickedDateStr;
-            renderCalendar();
-            displayLogsForDate(clickedDateStr);
+
+            // Update UI
+            selectedDateDisplay.textContent = clickedDateStr; // Update display below calendar
+            renderCalendar(); // Re-render to apply 'selected' class
+            displayLogsForDate(clickedDateStr); // Show logs for the new date
         }
 
+        /**
+         * 显示指定日期的日志
+         * @param {string} dateStr - YYYY-MM-DD 格式的日期字符串
+         */
         function displayLogsForDate(dateStr) {
-            logDisplayArea.innerHTML = '';
+            if (!logDisplayArea) return; // Guard clause
+
+            logDisplayArea.innerHTML = ''; // Clear previous logs
             const logs = localActionLogs[dateStr];
+
             if (logs && logs.length > 0) {
-                const sortedLogs = [...logs].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                // Sort logs by timestamp (descending - newest first)
+                // Ensure timestamp is a number before sorting
+                const sortedLogs = [...logs].sort((a, b) => (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0));
+
                 sortedLogs.forEach(logData => {
                     if (logData && logData.message) {
                         const logEl = document.createElement('div');
@@ -659,102 +972,500 @@
                     }
                 });
             } else {
-                logDisplayArea.innerHTML = '<p class="text-gray-500 italic">这一天没有奖券记录。</p>';
+                // Display message if no logs found for the date
+                logDisplayArea.innerHTML = '<p class="italic">这一天没有奖券记录。</p>';
             }
         }
 
-        // --- Firebase 数据监听 ---
+        // --- Message Board Functions ---
 
-        function listenToCouponChanges() {
-            couponsRef.on('value', (snapshot) => {
-                loadingIndicator.style.display = 'flex';
-                const couponsData = snapshot.val();
-                if (couponsData) {
-                    Object.keys(couponsData).forEach(couponId => {
-                        const card = document.querySelector(`.coupon-card[data-coupon-id="${couponId}"]`);
-                        if (card) {
-                            const quantity = couponsData[couponId]?.quantity ?? 0;
-                            updateQuantityDisplay(couponId, quantity);
-                        } else {
-                            console.warn(`Coupon data found for ID "${couponId}", but no matching card element.`);
-                        }
-                    });
-                    couponCards.forEach(card => {
-                        const couponId = card.dataset.couponId;
-                        if (couponId && (!couponsData || !couponsData[couponId])) {
-                             console.log(`Initializing missing coupon "${couponId}" in Firebase.`);
-                             couponsRef.child(couponId).set({
-                                 name: card.dataset.couponName || `Unnamed Coupon ${couponId}`,
-                                 quantity: 0
-                             }).catch(error => console.error(`Error initializing coupon ${couponId}:`, error));
-                             updateQuantityDisplay(couponId, 0);
-                        }
-                    });
-                } else {
-                    console.log("No 'coupons' data found in Firebase. Initializing...");
-                    const initialCoupons = {};
-                    couponCards.forEach(card => {
-                        const couponId = card.dataset.couponId;
-                        const couponName = card.dataset.couponName;
-                        if (couponId && couponName) {
-                            initialCoupons[couponId] = { name: couponName, quantity: 0 };
-                        }
-                    });
-                    couponsRef.set(initialCoupons).then(() => {
-                         console.log("Initial coupon data set.");
-                         Object.keys(initialCoupons).forEach(id => updateQuantityDisplay(id, 0));
-                    }).catch(error => console.error("Error setting initial coupons:", error));
+        /**
+         * 发送新留言或回复
+         * @param {string} messageId - null for new message, parent message ID for reply
+         * @param {HTMLInputElement} inputElement - The input field containing the message/reply
+         */
+        function sendMessageOrReply(messageId = null, inputElement) {
+             if (!inputElement) return; // Guard clause
+
+            const message = inputElement.value.trim();
+            const speakerRadio = document.querySelector('input[name="speaker"]:checked');
+            const speaker = speakerRadio ? speakerRadio.value : '未知'; // Default speaker if radio not found
+
+            if (!message) {
+                alert('请输入内容！');
+                inputElement.focus();
+                return;
+            }
+
+            const messageData = {
+                speaker: speaker,
+                message: message,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            let targetRef;
+            if (messageId) {
+                // This is a reply
+                targetRef = messagesRef.child(messageId).child('replies');
+            } else {
+                // This is a new message
+                targetRef = messagesRef;
+            }
+
+            targetRef.push(messageData).then(() => {
+                inputElement.value = ''; // Clear input on success
+                if (messageId) {
+                    // If it was a reply, hide the reply input area
+                    const replyContainer = inputElement.closest('.reply-container');
+                    if (replyContainer) {
+                        replyContainer.classList.add('hidden');
+                    }
                 }
-                 loadingIndicator.style.display = 'none';
-            }, (error) => {
-                console.error("Firebase coupon data read failed:", error);
-                loadingIndicator.textContent = '加载奖券数据失败，请检查网络或配置。';
+            }).catch(error => {
+                console.error("Error sending message/reply:", error);
+                alert('发送失败，请检查网络连接或稍后重试。');
             });
         }
 
+        /**
+         * 删除留言或回复
+         * @param {string} messageId - ID of the message or the parent message of the reply
+         * @param {string|null} replyId - ID of the reply to delete, or null to delete the message
+         */
+        function deleteMessageOrReply(messageId, replyId = null) {
+            if (!messageId) return; // Guard clause
+
+            const confirmationText = replyId ? '确定要删除这条回复吗？' : '确定要删除这条留言及其所有回复吗？';
+            if (!confirm(confirmationText)) {
+                return; // User cancelled
+            }
+
+            let targetRef;
+            if (replyId) {
+                 if (!messagesRef.child(messageId).child('replies').child(replyId)) return; // Check if exists
+                targetRef = messagesRef.child(messageId).child('replies').child(replyId);
+            } else {
+                 if (!messagesRef.child(messageId)) return; // Check if exists
+                targetRef = messagesRef.child(messageId);
+            }
+
+            targetRef.remove()
+                .then(() => {
+                    console.log(`Successfully deleted ${replyId ? 'reply' : 'message'}: ${replyId || messageId}`);
+                    // UI update will be handled by 'child_removed' listener
+                })
+                .catch(error => {
+                    console.error("Error deleting message/reply:", error);
+                    alert('删除失败，请稍后重试。');
+                });
+        }
+
+        /**
+         * 创建留言的 DOM 元素
+         * @param {object} messageData - 留言数据
+         * @param {string} messageId - 留言 ID
+         * @returns {HTMLDivElement | null} - 创建的留言元素或 null（如果数据无效）
+         */
+        function createMessageElement(messageData, messageId) {
+            if (!messageData || !messageId) return null; // Basic validation
+
+            const speaker = messageData.speaker || '未知';
+            const message = messageData.message || '';
+            const timestampValue = messageData.timestamp;
+            let timestamp = '未知时间';
+            if (timestampValue && !isNaN(Number(timestampValue))) {
+                timestamp = new Date(Number(timestampValue)).toLocaleString('zh-CN', {
+                    year: 'numeric', month: '2-digit', day: '2-digit',
+                    hour: '2-digit', minute: '2-digit'
+                });
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message-item p-4 rounded-lg shadow';
+            messageDiv.dataset.messageId = messageId;
+
+            // Reply Button
+            const replyButton = document.createElement('button');
+            replyButton.className = 'reply-button text-sm font-medium';
+            replyButton.textContent = '回复';
+            replyButton.onclick = () => {
+                const replyContainer = messageDiv.querySelector('.reply-container');
+                if (replyContainer) { // Check if exists
+                    replyContainer.classList.toggle('hidden');
+                    if (!replyContainer.classList.contains('hidden')) {
+                        const input = replyContainer.querySelector('input');
+                        if (input) input.focus();
+                    }
+                }
+            };
+
+            // Delete Button
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'delete-button text-sm font-medium ml-3';
+            deleteButton.textContent = '删除';
+            deleteButton.onclick = () => deleteMessageOrReply(messageId);
+
+            // Reply Input Container
+            const replyContainer = document.createElement('div');
+            replyContainer.className = 'reply-container hidden mt-3 pt-3 pl-4 border-l-2';
+
+            const replyInput = document.createElement('input');
+            replyInput.type = 'text';
+            replyInput.placeholder = '输入回复...';
+            replyInput.className = 'w-full px-3 py-1 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm';
+            replyInput.onkeypress = (e) => { if (e.key === 'Enter') sendReplyButton.click(); }; // Enter to send
+
+            const replyButtonContainer = document.createElement('div');
+            replyButtonContainer.className = 'flex justify-end mt-2 gap-2';
+
+            const sendReplyButton = document.createElement('button');
+            sendReplyButton.className = 'send-reply-button px-3 py-1 text-white rounded-lg transition duration-300 text-sm';
+            sendReplyButton.textContent = '发送';
+            sendReplyButton.onclick = () => sendMessageOrReply(messageId, replyInput);
+
+            const cancelReplyButton = document.createElement('button');
+            cancelReplyButton.className = 'cancel-reply-button px-3 py-1 rounded-lg transition duration-300 text-sm';
+            cancelReplyButton.textContent = '取消';
+            cancelReplyButton.onclick = () => {
+                replyContainer.classList.add('hidden');
+                replyInput.value = '';
+            };
+
+            replyButtonContainer.append(sendReplyButton, cancelReplyButton);
+            replyContainer.append(replyInput, replyButtonContainer);
+
+            // Replies List Container
+            const repliesContainer = document.createElement('div');
+            repliesContainer.className = 'replies-container mt-3 space-y-2 pl-4 border-l-2';
+
+            // Assemble Message Div
+            messageDiv.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <span class="message-speaker font-semibold ${speaker === '楚楚' ? 'chuchu' : 'gao'}">${speaker}</span>
+                    <span class="message-timestamp text-xs">${timestamp}</span>
+                </div>
+                <p class="message-text text-base mb-2 break-words">${message}</p>
+                <div class="message-actions flex justify-end items-center text-sm">
+                    </div>
+            `;
+
+            // Append buttons and containers
+            const actionsContainer = messageDiv.querySelector('.message-actions');
+            if (actionsContainer) { // Check if exists
+                 actionsContainer.append(replyButton, deleteButton);
+            }
+            messageDiv.append(repliesContainer, replyContainer); // Append replies list and input area
+
+            // Render existing replies
+            if (messageData.replies) {
+                Object.entries(messageData.replies).forEach(([replyId, replyData]) => {
+                    const replyDiv = createReplyElement(replyData, messageId, replyId);
+                    if (replyDiv) repliesContainer.appendChild(replyDiv); // Append only if valid
+                });
+            }
+             // Hide border if no replies initially
+            repliesContainer.style.display = repliesContainer.children.length > 0 ? 'block' : 'none';
+
+
+            return messageDiv;
+        }
+
+        /**
+         * 创建回复的 DOM 元素
+         * @param {object} replyData - 回复数据
+         * @param {string} messageId - 父留言 ID
+         * @param {string} replyId - 回复 ID
+         * @returns {HTMLDivElement | null} - 创建的回复元素或 null
+         */
+        function createReplyElement(replyData, messageId, replyId) {
+             if (!replyData || !messageId || !replyId) return null; // Basic validation
+
+            const speaker = replyData.speaker || '未知';
+            const message = replyData.message || '';
+            const timestampValue = replyData.timestamp;
+            let timestamp = '未知时间';
+            if (timestampValue && !isNaN(Number(timestampValue))) {
+                timestamp = new Date(Number(timestampValue)).toLocaleString('zh-CN', {
+                     month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                });
+            }
+
+            const replyDiv = document.createElement('div');
+            replyDiv.className = 'reply-item p-3 rounded-lg';
+            replyDiv.dataset.replyId = replyId;
+
+            // Delete Button for Reply
+            const deleteReplyButton = document.createElement('button');
+            deleteReplyButton.className = 'delete-button text-xs font-medium ml-2';
+            deleteReplyButton.textContent = '删除';
+            deleteReplyButton.onclick = () => deleteMessageOrReply(messageId, replyId);
+
+            replyDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-1">
+                    <span class="message-speaker text-sm font-semibold ${speaker === '楚楚' ? 'chuchu' : 'gao'}">${speaker}</span>
+                    <div class="flex items-center">
+                        <span class="reply-timestamp text-xs">${timestamp}</span>
+                        </div>
+                </div>
+                <p class="reply-text text-sm break-words">${message}</p>
+            `;
+
+            // Append delete button
+            const timestampContainer = replyDiv.querySelector('.flex.items-center');
+             if (timestampContainer) { // Check if exists
+                 timestampContainer.appendChild(deleteReplyButton);
+             }
+
+            return replyDiv;
+        }
+
+        /**
+         * 更新留言列表的显示状态（显示/隐藏 "无留言" 提示）
+         */
+        function updateMessageListVisibility() {
+             if (!messageList || !noMessagesIndicator) return; // Guard clause
+             // Check if any element with class 'message-item' exists inside 'messageList'
+            const hasMessages = messageList.querySelector('.message-item') !== null;
+            noMessagesIndicator.classList.toggle('hidden', hasMessages);
+        }
+
+
+        // --- Firebase Data Listeners ---
+
+        /**
+         * 监听奖券数据的变化
+         */
+        function listenToCouponChanges() {
+            couponsRef.on('value', (snapshot) => {
+                showLoading(); // Show loading indicator during processing
+                const couponsData = snapshot.val();
+                allCouponData = couponsData || {}; // Update global cache
+
+                if (couponsData) {
+                    // Update existing cards based on Firebase data
+                    Object.keys(couponsData).forEach(couponId => {
+                        const couponInfo = couponsData[couponId];
+                        if (couponInfo) { // Check if couponInfo exists
+                             const quantity = couponInfo.quantity ?? 0;
+                             updateQuantityDisplay(couponId, quantity);
+                             // Ensure name is cached
+                             if (!allCouponData[couponId]) allCouponData[couponId] = {};
+                             allCouponData[couponId].name = couponInfo.name || couponId;
+                        }
+                    });
+
+                    // Check for cards in HTML that are NOT in Firebase (e.g., newly added card)
+                    document.querySelectorAll('.coupon-card').forEach(card => {
+                        const couponId = card.dataset.couponId;
+                        const couponName = card.dataset.couponName || `未命名奖券 ${couponId}`;
+                        if (couponId && !couponsData[couponId]) {
+                            console.log(`Initializing missing coupon "${couponId}" in Firebase.`);
+                            // Add to Firebase with quantity 0
+                            couponsRef.child(couponId).set({
+                                name: couponName,
+                                quantity: 0
+                            }).then(() => {
+                                updateQuantityDisplay(couponId, 0); // Update UI after successful set
+                                // Add to local cache as well
+                                if (!allCouponData[couponId]) allCouponData[couponId] = {};
+                                allCouponData[couponId] = { name: couponName, quantity: 0 };
+                            }).catch(error => console.error(`Error initializing coupon ${couponId}:`, error));
+                        } else if (couponId && couponsData[couponId] && !allCouponData[couponId]?.name) {
+                             // Ensure name is cached even if quantity exists
+                             allCouponData[couponId].name = couponsData[couponId]?.name || couponName;
+                        }
+                    });
+                } else {
+                    // No coupons data at all in Firebase, initialize all cards from HTML
+                    console.log("No 'coupons' data found in Firebase. Initializing from HTML...");
+                    const initialCoupons = {};
+                    document.querySelectorAll('.coupon-card').forEach(card => {
+                        const couponId = card.dataset.couponId;
+                        const couponName = card.dataset.couponName || `未命名奖券 ${couponId}`;
+                        if (couponId) {
+                            initialCoupons[couponId] = { name: couponName, quantity: 0 };
+                        }
+                    });
+                    if (Object.keys(initialCoupons).length > 0) {
+                        couponsRef.set(initialCoupons).then(() => {
+                            console.log("Initial coupon data set from HTML.");
+                            allCouponData = { ...initialCoupons }; // Update cache (use spread for new object)
+                            Object.keys(initialCoupons).forEach(id => updateQuantityDisplay(id, 0));
+                        }).catch(error => console.error("Error setting initial coupons:", error));
+                    }
+                }
+                hideLoading(); // Hide loading indicator after processing
+            }, (error) => {
+                console.error("Firebase coupon data read failed:", error);
+                 if (loadingIndicator) { // Check if exists
+                    loadingIndicator.innerHTML = '<p class="text-red-500 font-semibold">加载奖券数据失败，请检查网络或配置。</p>';
+                 }
+                // Keep loading indicator visible on error, don't call hideLoading()
+            });
+        }
+
+        /**
+         * 监听日志数据的变化
+         */
         function listenToLogChanges() {
             logsRef.on('value', (snapshot) => {
                 const logsData = snapshot.val();
-                localActionLogs = {};
+                localActionLogs = {}; // Reset local cache
                 if (logsData) {
                     Object.keys(logsData).forEach(dateStr => {
                         const dateLogsFirebase = logsData[dateStr];
+                        // Ensure logs for the date are stored as an array
                         if (dateLogsFirebase && typeof dateLogsFirebase === 'object') {
-                            localActionLogs[dateStr] = Object.values(dateLogsFirebase);
+                            // Validate date string format (basic check)
+                            if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+                                 localActionLogs[dateStr] = Object.values(dateLogsFirebase)
+                                     .filter(log => log && typeof log === 'object'); // Filter out invalid entries
+                            } else {
+                                console.warn(`Invalid date format found in logs key: ${dateStr}`);
+                            }
                         }
                     });
                 }
+                // Re-render calendar to update 'has-log' indicators
                 renderCalendar();
+                // If a date is currently selected, refresh its log display
                 if (selectedDate) {
                     displayLogsForDate(selectedDate);
                 }
             }, (error) => {
                 console.error("Firebase log data read failed:", error);
+                // Optionally inform the user about the log loading issue
             });
         }
 
-        // --- 初始化与事件监听 ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadingIndicator.style.display = 'flex';
-            listenToCouponChanges();
-            listenToLogChanges();
+        /**
+         * 监听留言数据的变化 (child_added, child_removed, child_changed for replies)
+         */
+        function listenToMessageChanges() {
+             if (!messagesRef || !messageList) return; // Guard clause
+             messagesRef.off(); // Remove previous listeners before attaching new ones
 
-            const couponsContainer = document.querySelector('.lg\\:col-span-2 .grid');
-             if (couponsContainer) {
-                 couponsContainer.addEventListener('click', (event) => {
-                    const quantityButton = event.target.closest('.quantity-change');
-                    if (quantityButton) {
-                        handleQuantityChange(event);
-                        return;
+            // Listen for new messages
+            messagesRef.orderByChild('timestamp').on('child_added', (snapshot) => { // Order by timestamp
+                const messageData = snapshot.val();
+                const messageId = snapshot.key;
+                // Add only if data exists and element doesn't already exist
+                if (messageData && !document.querySelector(`.message-item[data-message-id="${messageId}"]`)) {
+                    const messageElement = createMessageElement(messageData, messageId);
+                    if (messageElement) { // Check if element creation was successful
+                        // Prepend new messages to show newest first
+                        messageList.insertBefore(messageElement, messageList.firstChild);
+                        updateMessageListVisibility();
                     }
-                    const useButton = event.target.closest('.use-coupon');
-                    if (useButton) {
-                        handleUseCoupon(event);
-                        return;
+                }
+            }, (error) => {
+                 console.error("Firebase message child_added listener error:", error);
+            });
+
+            // Listen for message removal
+            messagesRef.on('child_removed', (snapshot) => {
+                const messageId = snapshot.key;
+                const messageElement = document.querySelector(`.message-item[data-message-id="${messageId}"]`);
+                if (messageElement) {
+                    messageElement.remove();
+                    updateMessageListVisibility();
+                }
+            }, (error) => {
+                 console.error("Firebase message child_removed listener error:", error);
+            });
+
+            // Listen for changes within a message (primarily for replies)
+            messagesRef.on('child_changed', (snapshot) => {
+                const messageData = snapshot.val();
+                const messageId = snapshot.key;
+                const messageElement = document.querySelector(`.message-item[data-message-id="${messageId}"]`);
+
+                if (messageElement && messageData) { // Check if messageData exists
+                    const repliesContainer = messageElement.querySelector('.replies-container');
+                    if (repliesContainer) { // Check if container exists
+                        repliesContainer.innerHTML = ''; // Clear existing replies
+
+                        if (messageData.replies) {
+                            // Sort replies by timestamp before rendering (optional, but good practice)
+                            const sortedReplies = Object.entries(messageData.replies)
+                                .filter(([,reply]) => reply && typeof reply === 'object') // Filter invalid replies
+                                .sort(([, a], [, b]) => (a.timestamp || 0) - (b.timestamp || 0)); // Ascending
+
+                            sortedReplies.forEach(([replyId, replyData]) => {
+                                 const replyElement = createReplyElement(replyData, messageId, replyId);
+                                 if (replyElement) repliesContainer.appendChild(replyElement); // Append only if valid
+                            });
+                        }
+                        // Show/hide replies container based on content
+                        repliesContainer.style.display = repliesContainer.children.length > 0 ? 'block' : 'none';
                     }
-                });
+                } else if (messageElement && !messageData) {
+                     // Handle case where message data becomes null (e.g., deleted entirely)
+                     messageElement.remove();
+                     updateMessageListVisibility();
+                }
+            }, (error) => {
+                 console.error("Firebase message child_changed listener error:", error);
+            });
+        }
+
+
+        // --- Initialization and Event Listeners ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure all required DOM elements are present before proceeding
+            if (!themeToggle || !loadingIndicator || !messageInput || !sendMessageButton || !messageList || !noMessagesIndicator || !prevMonthBtn || !nextMonthBtn || !selectedDateDisplay || !logDisplayArea || couponGrids.length === 0) {
+                 console.error("Initialization failed: One or more essential DOM elements are missing.");
+                 alert("页面加载失败，缺少必要的元素。请刷新页面或联系管理员。");
+                 return;
+            }
+
+            showLoading(); // Show loading right away
+
+            // 1. Theme Setup
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            lightIcon.classList.toggle('hidden', savedTheme === 'dark');
+            darkIcon.classList.toggle('hidden', savedTheme === 'light');
+
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                lightIcon.classList.toggle('hidden');
+                darkIcon.classList.toggle('hidden');
+            });
+
+            // 2. Firebase Listeners (check if database is available)
+             if (typeof database !== 'undefined' && database) {
+                listenToCouponChanges();
+                listenToLogChanges();
+                listenToMessageChanges(); // Start listening for messages
+             } else {
+                 console.error("Firebase database is not available for listeners.");
+                 hideLoading(); // Hide loading indicator as listeners won't run
+                 alert("无法连接到数据库服务，部分功能可能无法使用。");
              }
 
+
+            // 3. Event Listeners for Interactions
+
+            // Coupon Card Buttons (Event Delegation on ALL Grids)
+            couponGrids.forEach(grid => {
+                 grid.addEventListener('click', (event) => {
+                    const quantityButton = event.target.closest('.quantity-change');
+                    const useButton = event.target.closest('.use-coupon');
+
+                    if (quantityButton) {
+                        handleQuantityChange(event);
+                    } else if (useButton) {
+                        handleUseCoupon(event);
+                    }
+                });
+            });
+
+
+            // Calendar Navigation
             prevMonthBtn.addEventListener('click', () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
                 renderCalendar();
@@ -764,286 +1475,26 @@
                 renderCalendar();
             });
 
-             renderCalendar();
-            selectedDateDisplay.textContent = '未选择日期';
-            logDisplayArea.innerHTML = '<p class="text-gray-500 italic">请在日历中选择一个日期查看奖券记录。</p>';
-
-            // 主题切换功能
-            const themeToggle = document.getElementById('theme-toggle');
-            const lightIcon = themeToggle.querySelector('.light-icon');
-            const darkIcon = themeToggle.querySelector('.dark-icon');
-            
-            // 检查本地存储中的主题设置
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            // 更新图标显示
-            if (savedTheme === 'dark') {
-                lightIcon.classList.add('hidden');
-                darkIcon.classList.remove('hidden');
-            }
-
-            themeToggle.addEventListener('click', () => {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                
-                // 切换图标显示
-                lightIcon.classList.toggle('hidden');
-                darkIcon.classList.toggle('hidden');
-            });
-
-            // 留言板功能
-            const messageInput = document.getElementById('message-input');
-            const sendButton = document.getElementById('send-message');
-            const messageList = document.getElementById('message-list');
-            const messagesRef = database.ref('messages');
-
-            // 发送留言
-            function sendMessage() {
-                const message = messageInput.value.trim();
-                const speaker = document.querySelector('input[name="speaker"]:checked').value;
-                
-                if (!message) {
-                    alert('请输入留言内容');
-                    return;
-                }
-
-                messagesRef.push({
-                    speaker: speaker,
-                    message: message,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                }).then(() => {
-                    messageInput.value = '';
-                }).catch(error => {
-                    console.error("Error sending message:", error);
-                    alert('发送失败，请重试');
-                });
-            }
-
-            // 发送回复
-            function sendReply(messageId, replyInput) {
-                const reply = replyInput.value.trim();
-                const speaker = document.querySelector('input[name="speaker"]:checked').value;
-                
-                if (!reply) {
-                    alert('请输入回复内容');
-                    return;
-                }
-
-                const replyRef = messagesRef.child(messageId).child('replies');
-                replyRef.push({
-                    speaker: speaker,
-                    message: reply,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                }).then(() => {
-                    replyInput.value = '';
-                    const replyContainer = replyInput.closest('.reply-container');
-                    if (replyContainer) {
-                        replyContainer.classList.add('hidden');
-                    }
-                }).catch(error => {
-                    console.error("Error sending reply:", error);
-                    alert('发送失败，请重试');
-                });
-            }
-
-            // 添加发送按钮点击事件
-            sendButton.addEventListener('click', sendMessage);
+            // Message Sending
+            sendMessageButton.addEventListener('click', () => sendMessageOrReply(null, messageInput));
             messageInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
-                    sendMessage();
+                    // Prevent default form submission if inside a form
+                    e.preventDefault();
+                    sendMessageOrReply(null, messageInput);
                 }
             });
 
-            // 渲染留言
-            function displayMessage(messageData, messageId) {
-                // 容错处理
-                const speaker = messageData.speaker || '未知';
-                const message = messageData.message || '';
-                const timestampValue = messageData.timestamp;
-                let timestamp = '未知时间';
-                if (timestampValue && !isNaN(Number(timestampValue))) {
-                    timestamp = new Date(Number(timestampValue)).toLocaleString('zh-CN', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                }
+            // 4. Initial Render/Setup
+             renderCalendar(); // Initial calendar render
+             updateMessageListVisibility(); // Check if messages are initially empty
+             selectedDateDisplay.textContent = '未选择日期'; // Set initial text
+             logDisplayArea.innerHTML = '<p class="italic">请在日历中选择一个日期查看奖券记录。</p>'; // Set initial text
 
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'bg-gray-50 p-4 rounded-lg';
-                messageDiv.dataset.messageId = messageId;
-                
-                // 创建回复按钮
-                const replyButton = document.createElement('button');
-                replyButton.className = 'text-sm text-blue-500 hover:text-blue-600 transition duration-300';
-                replyButton.textContent = '回复';
-                replyButton.addEventListener('click', () => {
-                    const replyContainer = messageDiv.querySelector('.reply-container');
-                    replyContainer.classList.toggle('hidden');
-                });
-
-                // 创建删除按钮
-                const deleteButton = document.createElement('button');
-                deleteButton.className = 'text-sm text-red-500 hover:text-red-600 transition duration-300 ml-2';
-                deleteButton.textContent = '删除';
-                deleteButton.addEventListener('click', () => {
-                    if (confirm('确定要删除这条留言吗？')) {
-                        messagesRef.child(messageId).remove()
-                            .catch(error => {
-                                console.error("Error deleting message:", error);
-                                alert('删除失败，请重试');
-                            });
-                    }
-                });
-
-                // 创建回复输入框容器
-                const replyContainer = document.createElement('div');
-                replyContainer.className = 'reply-container hidden mt-2 pl-4 border-l-2 border-gray-200';
-                
-                const replyInput = document.createElement('input');
-                replyInput.type = 'text';
-                replyInput.placeholder = '输入回复...';
-                replyInput.className = 'w-full px-3 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm';
-                
-                const replyButtonContainer = document.createElement('div');
-                replyButtonContainer.className = 'flex justify-end mt-2 gap-2';
-                
-                const sendReplyButton = document.createElement('button');
-                sendReplyButton.className = 'px-3 py-1 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 text-sm';
-                sendReplyButton.textContent = '发送';
-                sendReplyButton.addEventListener('click', () => sendReply(messageId, replyInput));
-                
-                const cancelButton = document.createElement('button');
-                cancelButton.className = 'px-3 py-1 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-300 text-sm';
-                cancelButton.textContent = '取消';
-                cancelButton.addEventListener('click', () => {
-                    replyContainer.classList.add('hidden');
-                    replyInput.value = '';
-                });
-
-                replyButtonContainer.appendChild(sendReplyButton);
-                replyButtonContainer.appendChild(cancelButton);
-                
-                replyContainer.appendChild(replyInput);
-                replyContainer.appendChild(replyButtonContainer);
-
-                // 创建回复列表容器
-                const repliesContainer = document.createElement('div');
-                repliesContainer.className = 'replies-container mt-2 space-y-2';
-                
-                // 如果有回复，显示回复
-                if (messageData.replies) {
-                    Object.entries(messageData.replies).forEach(([replyId, replyData]) => {
-                        const replyDiv = createReplyElement(replyData, messageId, replyId);
-                        repliesContainer.appendChild(replyDiv);
-                    });
-                }
-
-                messageDiv.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="font-semibold ${speaker === '楚楚' ? 'text-pink-500' : 'text-blue-500'}">${speaker}</span>
-                        <span class="text-sm text-gray-500">${timestamp}</span>
-                    </div>
-                    <p class="text-gray-700">${message}</p>
-                    <div class="flex justify-end mt-2">
-                    </div>
-                `;
-
-                const buttonContainer = messageDiv.querySelector('.flex.justify-end');
-                buttonContainer.appendChild(replyButton);
-                buttonContainer.appendChild(deleteButton);
-                
-                messageDiv.appendChild(repliesContainer);
-                messageDiv.appendChild(replyContainer);
-                messageList.appendChild(messageDiv);
-                messageList.scrollTop = messageList.scrollHeight;
-            }
-
-            // 渲染回复
-            function createReplyElement(replyData, messageId, replyId) {
-                const speaker = replyData.speaker || '未知';
-                const message = replyData.message || '';
-                const timestampValue = replyData.timestamp;
-                let timestamp = '未知时间';
-                if (timestampValue && !isNaN(Number(timestampValue))) {
-                    timestamp = new Date(Number(timestampValue)).toLocaleString('zh-CN', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                }
-
-                const replyDiv = document.createElement('div');
-                replyDiv.className = 'bg-gray-100 p-3 rounded-lg ml-4';
-                replyDiv.dataset.replyId = replyId;
-                
-                // 创建删除按钮
-                const deleteButton = document.createElement('button');
-                deleteButton.className = 'text-xs text-red-500 hover:text-red-600 transition duration-300 ml-2';
-                deleteButton.textContent = '删除';
-                deleteButton.addEventListener('click', () => {
-                    if (confirm('确定要删除这条回复吗？')) {
-                        messagesRef.child(messageId).child('replies').child(replyId).remove()
-                            .catch(error => {
-                                console.error("Error deleting reply:", error);
-                                alert('删除失败，请重试');
-                            });
-                    }
-                });
-
-                replyDiv.innerHTML = `
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="font-semibold ${speaker === '楚楚' ? 'text-pink-500' : 'text-blue-500'}">${speaker}</span>
-                        <div class="flex items-center">
-                            <span class="text-xs text-gray-500">${timestamp}</span>
-                        </div>
-                    </div>
-                    <p class="text-gray-700 text-sm">${message}</p>
-                `;
-
-                const timestampContainer = replyDiv.querySelector('.flex.items-center');
-                timestampContainer.appendChild(deleteButton);
-
-                return replyDiv;
-            }
-
-            // 只保留 child_added 和 child_changed 监听，不要用 once('value') 全量渲染
-            messageList.innerHTML = ''; // 每次页面加载时清空
-            messagesRef.off(); // 先移除所有监听，防止多次绑定
-
-            messagesRef.on('child_added', (snapshot) => {
-                const messageData = snapshot.val();
-                const messageId = snapshot.key;
-                displayMessage(messageData, messageId);
-            });
-
-            messagesRef.on('child_changed', (snapshot) => {
-                const messageData = snapshot.val();
-                const messageId = snapshot.key;
-                const messageDiv = document.querySelector(`[data-message-id=\"${messageId}\"]`);
-                if (messageDiv) {
-                    const repliesContainer = messageDiv.querySelector('.replies-container');
-                    repliesContainer.innerHTML = '';
-                    if (messageData.replies) {
-                        Object.entries(messageData.replies).forEach(([replyId, replyData]) => {
-                            const replyDiv = createReplyElement(replyData, messageId, replyId);
-                            repliesContainer.appendChild(replyDiv);
-                        });
-                    }
-                }
-            });
+            // Hide loading indicator once everything is set up (already handled in listenToCouponChanges if successful)
+            // If Firebase fails, hideLoading might need to be called explicitly in the error handler.
         });
 
-        // 更新加载指示器样式
-        loadingIndicator.innerHTML = '<div class="loading-spinner"></div>';
     </script>
 
 </body>
